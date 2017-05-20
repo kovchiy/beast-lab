@@ -1,0 +1,38 @@
+.Tabs
+    overflow hidden
+
+    &__hidescroll
+        overflow hidden
+
+    &__tabs
+        touch-scroll x
+        padding-bottom 40px
+        margin-bottom -40px
+        transform translateZ(0)
+        .tabs_transition &
+            transition transform .2s
+
+    &__tab
+        line-height 50px
+        display inline-block
+        & + &
+            margin-left 1em
+        &_state
+            &_release
+                opacity alpha-text
+
+    &__itemsMove
+        white-space nowrap
+        transform translateZ(0)
+        .tabs_transition &
+            transition transform .2s
+
+    &__item
+        display inline-block
+        white-space normal
+        width 100%
+        vertical-align top
+        overflow hidden
+
+    &__items:not(&__items_moving) &__item_state_release > div
+        display none

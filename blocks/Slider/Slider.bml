@@ -1,0 +1,108 @@
+/**
+ * @block Slider Слайдер
+ * @dep grid controlform
+ * @tag control
+ * @ext controlform grid
+ */
+Beast.decl({
+    Slider: {
+        inherits: ['Grid', 'ControlForm'],
+        mod: {
+            Col: 'max',   // @mod Col {max* 1 2 3 ...} Размер по ширине (см. блок #Grid)
+            Fill: false,  // @mod Fill {boolean} Включить активный цвет
+        },
+        param: {
+            value: 0 // @param value {number} значение элемента
+        },
+        expand: function () {
+            this.append(
+                <control>
+                    <track/>
+                    <pointer/>
+                </control>
+            )
+        }
+    },
+    Slider__control: {
+        mod: {
+            Transition: false
+        },
+        param: {
+            tracePosition: [0]
+        },
+        expand: function () {
+            if (this.parentBlock().mod('Fill')) {
+                this.append(
+                    this.get(), <fill/>
+                )
+            }
+        },
+        domInit: function () {
+            requestAnimationFrame(function () {
+                MissEvent.horizontalSwipe(this.domNode(), undefined, 250)
+
+                var width = this.domNode().offsetWidth
+                this.moveTo(
+                    parseFloat(this.parentBlock().param('value')) * width,
+                    0,
+                    width
+                )
+            }.bind(this))
+        },
+        on: {
+            swipe: function (e, data) {
+                requestAnimationFrame(
+                    this.moveTo.bind(this, data.x, 0, data.width)
+                )
+
+                if (this.param('tracePosition').length === 2) {
+                    this.param('tracePosition').shift()
+                }
+                this.param('tracePosition').push(data.x)
+            },
+            didswipe: function (e, data) {
+                if (MissEvent.mobilde && data.holdTime < 200) {
+                    requestAnimationFrame(function () {
+                        var positionDiff = Math.abs(
+                            this.param('tracePosition')[1] - this.param('tracePosition')[0]
+                        ) * (data.delta < 0 ? -1 : 1)
+
+                        this.moveTo(
+                            data.x + positionDiff * 4, 0, data.width, true
+                        )
+
+                        this.param('tracePosition', [0])
+                    }.bind(this))
+                } else {
+                    this.trigger('DidChange', this.param('value'))
+                    this.param('tracePosition', [0])
+                }
+            },
+            swipefail: function (e, data) {
+                this.moveTo(data.x, 0, data.width, true)
+                this.trigger('DidChange', this.param('value'))
+            },
+            DidChange: ''
+        },
+        moveTo: function (value, min, max, decelerate) {
+            if (value > max) value = max
+            if (value < min) value = min
+
+            var transform = {transform: 'translateX(' + value + 'px)'}
+
+            this.mod('Decelerate', decelerate)
+            this.elem('pointer')[0].css(transform)
+            this.elem('fill')[0] && this.elem('fill')[0].css({width: value + 1})
+
+            setTimeout(function () {
+                this.mod('Decelerate', false)
+            }.bind(this), 500)
+
+            this.param('value', value / max)
+            this.trigger('Changing', this.param('value'))
+        }
+    }
+})
+
+// @example <Slider Fill value="0.2"/>
+// @example <Slider value="0.6"/>

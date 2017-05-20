@@ -1,0 +1,106 @@
+.Slider
+
+    /**
+     * Mixin
+     */
+    define-theme(theme, text, background, check)
+        &_theme_{theme}
+
+            if is-light-color(background)
+                control-border = control-border-light
+                control-focus = control-focus-light
+            else if is-mid-color(background)
+                control-border = control-border-mid
+                control-focus = control-focus-mid
+            else if is-dark-color(background)
+                control-border = control-border-dark
+                control-focus = control-focus-dark
+
+            .slider__track
+                background background * control-border
+
+            .slider__pointer
+                border-color background * control-border
+                background background * control-foreground-light
+
+            &.slider_fill
+                .slider__pointer
+                    border-color check
+
+            &.slider_mouseover
+                .slider__pointer
+                    background check
+                    border-color check
+
+            .slider__fill
+                background check
+
+    define-shape(size, margin)
+        pointer-size = size - (margin * 2)
+
+        &__control
+            height size
+            margin-left (size / 2)
+            margin-right (size / 2)
+
+        &__track
+            left: - (size / 2)
+            right - (size / 2)
+            top (size / 2) - (margin / 2)
+            height margin
+            border-radius margin
+
+        &__fill
+            left - (size / 2)
+            top (size / 2) - (margin / 2)
+            height margin
+            border-radius margin 0 0 margin
+
+        &__pointer
+            top margin
+            width pointer-size
+            height pointer-size
+            margin-left - (pointer-size / 2) - margin
+            margin-top - margin
+            border margin solid
+
+
+    /**
+     * Style
+     */
+    for theme in control-theme
+        define-theme(
+            theme,
+            control-theme[theme].text,
+            control-theme[theme].background,
+            control-theme[theme].check
+        )
+
+    @media screen-touch
+        define-shape(control-size-s-touch, control-margin-touch)
+
+    @media screen-desktop
+        define-shape(control-size-s-desktop, control-margin-desktop)
+
+    &__control
+        position relative
+
+        &_decelerate
+            .slider__fill
+            .slider__pointer
+                transition:
+                    transform 300ms cubic-bezier(0, 0, 0, 1),
+                    width 300ms cubic-bezier(0, 0, 0, 1)
+
+    &__track
+        position absolute
+
+    &__fill
+        position absolute
+
+    &__pointer
+        position absolute
+        border-radius 100%
+        transition:
+            background .15s linear,
+            border-color .15s linear

@@ -1,0 +1,47 @@
+/**
+ * @block Switch Переключатель
+ * @dep ControlForm
+ * @tag control
+ * @ext ControlForm
+ */
+Beast.decl({
+    Switch: {
+        inherits: 'ControlForm',
+        mod: {
+            State: 'release' // @mod State {active release!} Включить / выключить
+        },
+        on: {
+            // @event Release Произошло нажатие
+            Release: function () {
+                this.toggleMod('State', 'release', 'active')
+            }
+        },
+        expand: function fn () {
+            this.inherited(fn)
+
+            this.append(
+                <track>
+                    <pointer/>
+                </track>
+            )
+
+            if (this.text()) {
+                this.append(<label>{Typo.trimSpaces(this.text())}</label>)
+            }
+        }
+    },
+    Switch__track: {
+        domInit: function () {
+            MissEvent.horizontalSwipe(this.domNode())
+        },
+        on: {
+            didswipe: function (e, data) {
+                if (data.isFast) {
+                    this.mod('State', data.delta > 0 ? 'active' : 'release')
+                }
+            }
+        }
+    }
+})
+
+// @example <Switch/>

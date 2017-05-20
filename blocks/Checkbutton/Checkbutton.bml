@@ -1,0 +1,38 @@
+/**
+ * @block Checkbutton Западающая кнопка
+ * @dep button
+ * @tag control
+ * @ext button
+ */
+Beast.decl({
+    Checkbutton: {
+        inherits: 'Button',
+        mod: {
+            State: 'release', // @mod State {active release!} Выбран / не выбран
+            Radio: false,     // @mod Radio {boolean}
+        },
+        on: {
+            // @event Release Произошло нажатие
+            Release: function () {
+                if (this.mod('Radio')) {
+                    this.mod('State', 'active')
+                } else {
+                    this.toggleMod('State', 'release', 'active')
+                }
+            }
+        }
+    },
+    // @elem Checkbutton__label Лейбл
+    Checkbutton__label: {
+        inherits: 'Button__label' // @inherits Button__label
+    }
+})
+
+ // @example <Checkbutton>Нравится</Checkbutton>
+
+ /**
+  * @example
+  * <Checkbutton>
+        <label>Нравится</label>
+  * </Checkbutton>
+  */

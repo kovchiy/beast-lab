@@ -1,0 +1,12 @@
+.Metas
+    &__meta
+        display inline
+        color color-hint
+        & + &:before
+            content ';'
+            color transparent
+            display inline-block
+            width 3px
+            margin 0 1ex
+            mask center center no-repeat @css{url(i/dot.svg)}
+            background color-hint

@@ -1,0 +1,71 @@
+/**
+ * @block MapThumb Карта
+ * @dep grid
+ * @tag thumb geo
+ * @ext grid
+ */
+Beast.decl({
+    MapThumb: {
+        inherits: 'Grid',
+        mod: {
+            Rounded: false,     // @mod Rounded {boolean} Скругленные углы карты
+            Ratio: '2x1',       // @mod Ratio {2x1! 3x2} Пропорции (см. блок #Thumb)
+            CentralPin: false,  // @mod CentralPin {boolean} Наличие пина в центре
+        },
+        expand: function () {
+            var tileSize = 450
+            var mapSrc = 'https://static-maps.yandex.ru/1.x/?size='+ tileSize +','+ tileSize +'&l=map'
+
+            if (this.has('lat') && this.has('lon') && this.has('zoom')) {
+                var lat = this.get('lat')[0].text()
+                var lon = this.get('lon')[0].text()
+                var zoom = this.get('zoom')[0].text()
+
+                mapSrc += '&ll=' + lon + ',' + lat + '&z=' + zoom
+            }
+
+            mapSrc += '&scale=' + window.devicePixelRatio
+            this.css('background-size', (tileSize / window.devicePixelRatio) + 'px')
+
+            var pointers = this.elem('pointer')
+            if (pointers.length > 0) {
+                var pointerStyle = pointers.length === 1 ? 'pm2rdm' : 'round'
+                var pointersString = ''
+
+                mapSrc += '&pt=' + pointers
+                    .map(function (pointer) {
+                        var lat = pointer.get('lat')[0].text()
+                        var lon = pointer.get('lon')[0].text()
+                        return [lon, lat, pointerStyle].join(',')
+                    })
+                    .join('~')
+            }
+
+            this.empty().css({
+                backgroundImage: 'url('+ mapSrc +')'
+            })
+
+            if (this.mod('CentralPin')) {
+                this.append(<pin/>)
+            }
+        }
+    }
+})
+
+/**
+ * @example
+ * <MapThumb Col="max" Rounded>
+ *     <lat>57.753630</lat>
+ *     <lon>37.620070</lon>
+ *     <zoom>2</zoom>
+ *
+ *     <pointer>
+ *         <lat>48.753630</lat>
+ *         <lon>30.620070</lon>
+ *     </pointer>
+ *     <pointer>
+ *         <lat>65.753630</lat>
+ *         <lon>42.620070</lon>
+ *     </pointer>
+ * </MapThumb>
+ */

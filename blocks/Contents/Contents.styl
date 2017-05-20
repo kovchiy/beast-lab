@@ -1,0 +1,26 @@
+.Contents
+
+    &__line
+        display flex
+        justify-content space-between
+        & + &
+            margin-top 2ex
+        &_active
+            .contents__key
+                color color-link
+
+    &__key
+    &__value
+        align-self flex-end
+        white-space pre
+
+    &__value
+        text-align right
+
+    &__space
+        align-self flex-end
+        flex-grow 2
+        background left bottom repeat-x @css{url(i/dotted.svg)}
+        height 2px
+        margin 0 .6ex
+        margin-bottom .4ex

@@ -1,0 +1,13 @@
+/**
+ * @block Link Ссылка
+ * @dep control
+ * @tag base
+ */
+Beast.decl({
+    Link: {
+        inherits: ['Control','Typo'], // @inherits control
+        mod: {
+            kind: 'default',    // link
+        },
+    }
+})

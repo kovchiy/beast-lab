@@ -1,0 +1,124 @@
+/**
+ * @block PopupMenu Выпадающее меню
+ * @dep Control typo icon thumb divider
+ * @tag control
+ */
+Beast.decl({
+    PopupMenu: {
+        mod: {
+            Theme: 'default',
+            State: 'release',
+        },
+        param: {
+            target: '',
+        },
+        expand: function () {
+            var hasToggleItems = this.get('item').filter(function (item) {
+                return item.mod('State')
+            }).length > 0
+
+            this.append(
+                <items>{this.get('/')}</items>.mod('HasToggleItems', hasToggleItems)
+            )
+        },
+        domInit: function () {
+            if (this.param('target')) {
+                this.param('target').onDomInit(function () {
+                    requestAnimationFrame(function () {
+                        this.updatePosition()
+                    }.bind(this))
+
+                    this.param('target').on('Release', function () {
+                        this.toggleMod('State', 'active', 'release')
+                    }.bind(this))
+                }.bind(this))
+            }
+        },
+        onWin: {
+            resize: function () {
+                this.updatePosition()
+            },
+            click: function (e) {
+                if (
+                    this.param('target') &&
+                    e.target !== this.param('target').domNode() &&
+                    !this.param('target').domNode().contains(e.target) &&
+                    !this.domNode().contains(e.target)
+                ) {
+                    this.mod('State', 'release')
+                }
+            }
+        },
+        bindTo: function (target) {
+            var root = target
+            while (root.parentNode()) {
+                root = root.parentNode()
+            }
+
+            this.param('target', target)
+                .appendTo(root)
+
+            return this
+        },
+        updatePosition: function () {
+            var offsetParent = this.param('target').domNode()
+            var left = offsetParent.offsetLeft
+            var top = offsetParent.offsetTop
+            var height = offsetParent.offsetHeight
+
+            while (offsetParent = offsetParent.offsetParent) {
+                left += offsetParent.offsetLeft
+                top += offsetParent.offsetTop
+            }
+
+            this.css({
+                left: left,
+                top: top + height + 3
+            })
+        }
+    },
+    PopupMenu__item: {
+        inherits: ['Control', 'Typo'],
+        mod: {
+            Disabled: false,
+            State: '',
+            Text: 'M',
+        },
+        param: {
+            title: '',
+            thumb: '',
+            icon: '',
+            hint: '',
+        },
+        expand: function () {
+            this.append(
+                this.parentNode().mod('hasToggleItems') && <tip/>,
+                this.param('icon') && <Icon Name="{this.param('icon')}"/>,
+                this.param('thumb') && <Thumb Ratio="1x1">{this.param('thumb')}</Thumb>,
+                <title>{this.param('title')}</title>,
+                this.param('hint') && <hint>{this.param('hint')}</hint>,
+                this.get('custom')
+            )
+
+            if (this.has('item')) {
+                this.append(
+                    <right/>,
+                    <items>{this.get()}</items>
+                )
+            }
+
+            if (this.mod('State')) {
+                this.on('Release', function () {
+                    this.toggleMod('State', 'active', 'release')
+                })
+            }
+        }
+    },
+    PopupMenu__divider: {
+        expand: function () {
+            this.implementWith(
+                <Divider Theme="{this.parentBlock().mod('Theme')}"/>
+            )
+        }
+    },
+})

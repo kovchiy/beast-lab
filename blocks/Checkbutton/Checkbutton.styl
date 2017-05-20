@@ -1,0 +1,25 @@
+.Checkbutton
+
+    /**
+     * Mixin
+     */
+    define-theme(theme, text, background, check)
+        &_theme_{theme}
+            &.Checkbutton_state_active
+                background-color check
+                if abs(luminosity(check) - luminosity(text)) < .5
+                    .button__label
+                        color background
+                &.Checkbutton_mouseover
+                    background-color check * control-hover
+
+    /**
+     * Style
+     */
+    for theme in control-theme
+        define-theme(
+            theme,
+            control-theme[theme].text,
+            control-theme[theme].background,
+            control-theme[theme].check
+        )

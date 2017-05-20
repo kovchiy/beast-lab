@@ -1,0 +1,32 @@
+/**
+ * @block Gallery Галерея изображений
+ * @dep HorizontalScroll Thumb
+ * @tag serp oo
+ */
+Beast.decl({
+    Gallery: {
+        mod: {
+            Size: 'M', // @mod Size {M! L} Размер
+        },
+        expand: function () {
+            this.append(
+                <HorizontalScroll ShowArrows>{this.get('thumb')}</HorizontalScroll>
+            )
+        }
+    },
+    Gallery__thumb: {
+        expand: function () {
+            this.implementWith(<Thumb>{this.text()}</Thumb>)
+        }
+    }
+})
+
+/**
+ * @example
+ * <Gallery>
+ *     <thumb>/assets/games/01.jpg</thumb>
+ *     <thumb>/assets/games/02.jpg</thumb>
+ *     <thumb>/assets/games/03.jpg</thumb>
+ *     <thumb>/assets/games/04.jpg</thumb>
+ * </Gallery>
+ */

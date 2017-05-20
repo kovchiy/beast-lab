@@ -1,0 +1,34 @@
+/**
+ * @block Link Ссылка
+ * @dep control
+ * @tag base
+ * @ext control
+ */
+Beast.decl({
+    Link: {
+        inherits: 'Control', // @inherits control
+        mod: {
+            Active: false, // @mod Active {boolean} Зависит от наличия параметра href (устанавливается автоматически)
+        },
+        param: {
+            href:'',            // @param href {string} ссылка на сайт
+            source: '',         // @param source {string} название сайта
+            service: '',        // @param service {string} ?
+            data: {},           // @param data {string} для хранения полезных данных
+            serviceTitle: '',   // @param serviceTitle {string} ?
+        },
+        domInit: function fn () {
+            this.inherited(fn)
+
+            if (this.param('href')) {
+                this.mod('Active', true)
+            }
+        },
+        on: {
+            // @event Release Произошло нажатие
+            Release: function () {
+
+            }
+        }
+    }
+})

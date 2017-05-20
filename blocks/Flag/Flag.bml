@@ -1,0 +1,19 @@
+/**
+ * @block Flag Флаг
+ * @tag icon
+ */
+Beast.decl({
+    Flag: {
+        mod: {
+            Size: 'S',  // @mod Size {S! M L} Размер
+            Code: 'RU', // @mod Name {string} Сокращённое название страны #/blocks/Flag/i
+        },
+        expand: function () {
+            this.css({
+                'background-image': 'url(/blocks/Flag/i/'+ this.mod('code') +'.svg)'
+            })
+        }
+    }
+})
+
+// @example <Flag Code="RU"/>

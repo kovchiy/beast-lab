@@ -1,0 +1,65 @@
+/**
+ * @block Select Селект
+ * @dep button typo
+ * @tag control
+ * @ext button
+ */
+Beast.decl({
+    Select: {
+        inherits: 'Button',
+        tag: 'div',
+        Mod: {
+            Col: 'max', // @mod Col {max 1 2 3 ...} Размер по ширине (см. блок #Grid)
+            Theme: '', // @mod Theme {base! whiteOnRed } Тема
+        },
+        expand: function fn () {
+            this.inherited(fn)
+                .append(
+                    <arrows/>,
+                    <select>{this.get('option')}</select>
+                )
+        }
+    },
+    Select__label: {
+        inherits: 'Button__label',
+        noElems: false,
+        expand: function () {
+            this.append(
+                this.elem('option')[0].text()
+            )
+        }
+    },
+    Select__icon: {
+        inherits: 'Button__icon',
+    },
+    Select__select: {
+        inherits: 'Typo',
+        tag: 'select',
+        mod: {
+            Text:'M'
+        },
+        on: {
+            change: function () {
+                this.parentBlock().value(this.domNode().value)
+            }
+        }
+    },
+    Select__option: {
+        tag:'option',
+        expand: function () {
+            if (this.param('value')) {
+                this.domAttr('value', this.param('value'))
+            }
+        }
+    }
+})
+
+/**
+ * @example
+ * <Select>
+ *     <option value="Mazda">Mazda</option>
+ *     <option value="Opel">Opel</option>
+ *     <option value="BMW">BMW</option>
+ *     <option value="Lada">Lada</option>
+ * </Select>
+ */

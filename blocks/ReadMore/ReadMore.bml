@@ -1,0 +1,73 @@
+/**
+ * @block ReadMore Читать ещё
+ * @dep control locale
+ * @tag snippet
+ * @ext control locale
+ */
+Beast.decl({
+    ReadMore: {
+        inherits: ['Control', 'Locale'], // @inherits ControlForm
+        locale: {
+            ru: {
+                readMore: 'Читать ещё'
+            },
+            en: {
+                readMore: 'Read more'
+            }
+        },
+        mod: {
+            State: '', // full
+        },
+        expand: function () {
+            var text = this.text()
+            var spaceAfter140 = text.substr(140).indexOf(' ')
+
+            if (spaceAfter140 > -1) {
+                spaceAfter140 += 140
+
+                var textToShow = text.substr(0,spaceAfter140)
+                var textToHide = text.substr(spaceAfter140)
+
+                this.append(
+                        <textContent/>.append(
+                            textToShow,
+                            <ellipsis>… </ellipsis>,
+                            <hiddenText>{textToHide}</hiddenText>,
+                            <more>{this.string('readMore')}</more>
+                        )
+                    )
+                    .mod('State', 'short')
+            }
+        },
+        on: {
+            // @event Release Произошло нажатие
+            Release: function () {
+                if (this.mod('State') === 'short') {
+                    requestAnimationFrame(function () {
+                        this.css({
+                                height: this.domNode().offsetHeight
+                            })
+                            .mod('State', 'full')
+                            .css({
+                                height: this.elem('textContent')[0].domNode().offsetHeight
+                            })
+
+                        this.elem('hiddenText')[0].css('opacity', '1')
+                    }.bind(this))
+                }
+            },
+            transitionend: function () {
+                requestAnimationFrame(function () {
+                    this.css('height', '')
+                }.bind(this))
+            }
+        }
+    },
+})
+
+/**
+ * @example
+ * <ReadMore>
+ * Компьютерная игра в жанре Action/RPG с открытым миром, разработанная компанией FromSoftware для платформ Windows, PlayStation 4 и Xbox One. Анонс игры произошёл 15 июня на конференции Microsoft в рамках выставки «E3 2015». Выход игры состоялся 24 марта 2016 года в Японии для Xbox One и PS4. Релиз во всём мире на консолях и PC состоялся 12 апреля 2016 года.
+ * </ReadMore>
+ */

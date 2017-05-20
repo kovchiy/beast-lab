@@ -1,0 +1,9 @@
+Beast.decl({
+	
+	Test: {
+		expand: function() {
+			console.log('и всё, и ничего')
+		}
+	}
+
+})

@@ -1,0 +1,68 @@
+/**
+ * @block ButtonTabs Табы из кнопок
+ * @dep button ControlGroup
+ * @tag control
+ */
+Beast.decl({
+    ButtonTabs: {
+        param: {
+            activeIndex: undefined,
+        },
+        expand: function () {
+            var buttons = []
+
+            this.get('tab').forEach(function (tab, index) {
+                buttons.push(
+                    <button>{tab.param('title')}</button>
+                )
+
+                if (tab.mod('State') === 'active') {
+                    this.param('activeIndex', index)
+                }
+            }.bind(this))
+
+            this.append(
+                <ControlGroup Mode="line">{buttons}</ControlGroup>,
+                this.get('tab')
+            )
+        },
+        switchToIndex: function (index) {
+            this.param('activeIndex', index)
+            this.elem('button').forEach(function (button, i) {
+                var tab = this.parentBlock().elem('tab')[i]
+
+                if (index === i) {
+                    button.mod('State', 'active')
+                    tab.mod('State', 'active')
+                } else {
+                    button.mod('State', 'release')
+                    tab.mod('State', 'release')
+                }
+            }.bind(this))
+        },
+        domInit: function () {
+            this.switchToIndex(
+                this.param('activeIndex') || 0
+            )
+        }
+    },
+    ButtonTabs__button: {
+        on: {
+            Release: function () {
+                this.parentBlock().switchToIndex(
+                    this.index()
+                )
+            }
+        },
+        expand: function () {
+            this.implementWith(
+                <Checkbutton Radio>{this.text()}</Checkbutton>
+            )
+        },
+    },
+    ButtonTabs__tab: {
+        mod: {
+            State: 'release',
+        }
+    }
+})

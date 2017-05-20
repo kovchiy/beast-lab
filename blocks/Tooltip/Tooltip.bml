@@ -1,0 +1,78 @@
+/**
+ * @block Tooltip Всплывающая подсказка
+ * @dep Control
+ * @tag control
+ * @ext control
+ */
+Beast.decl({
+    Tooltip: {
+        inherits: 'Control',
+        mod: {
+            Theme: 'default',
+            State: 'release',
+        },
+        param: {
+            target: '',
+        },
+        expand: function () {
+            this.append(
+                <tail/>,
+                <label>{this.text()}</label>
+            )
+        },
+        domInit: function () {
+            if (this.param('target')) {
+                this.param('target').onDomInit(function () {
+                    requestAnimationFrame(function () {
+                        this.updatePosition()
+                        this.mod('State', 'active')
+                    }.bind(this))
+                }.bind(this))
+            }
+        },
+        onWin: {
+            resize: function () {
+                this.updatePosition()
+            }
+        },
+        on: {
+            Release: function () {
+                this.remove()
+            }
+        },
+        bindTo: function (target) {
+            var root = target
+            while (root.parentNode()) {
+                root = root.parentNode()
+            }
+
+            this.param('target', target)
+                .appendTo(root)
+
+            return this
+        },
+        updatePosition: function () {
+            var offsetParent = this.param('target').domNode()
+            var left = offsetParent.offsetLeft
+            var top = offsetParent.offsetTop
+            var height = offsetParent.offsetHeight
+
+            while (offsetParent = offsetParent.offsetParent) {
+                left += offsetParent.offsetLeft
+                top += offsetParent.offsetTop
+            }
+
+            this.css({
+                left: left - 2,
+                top: top + height - 4
+            })
+        }
+    },
+    Tooltip__label: {
+        inherits: 'Typo',
+        mod: {
+            text:'S',
+            medium:true
+        }
+    }
+})

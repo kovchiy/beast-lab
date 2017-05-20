@@ -1,0 +1,64 @@
+/**
+ * @block Contents Таблица ключ-значение
+ * @dep typo
+ * @tag table fact
+ * @ext typo
+ */
+Beast.decl({
+    Contents__line: {
+        inherits: 'Typo',
+        mod: {
+            Text: 'M',      // @mod Text {S M* L XL} Размер текста (см. блок #Typo)
+            Line: 'S',      // @mod Line {S* M L} Высота строки (см. блок #Typo)
+            Active: false,
+        },
+        param: {
+            href: '', // @param href {string} ссылка на источник
+        },
+        expand: function () {
+            if (this.param('href')) {
+                this.mod('active', true)
+            }
+
+            this.append(
+                this.get('key'),
+                <space/>,
+                this.get('value')
+            )
+        }
+    },
+    Contents__value: {
+        inherits: 'Typo',
+        mod: {
+            Bold: true
+        },
+    }
+})
+
+/**
+ * @example
+ * <Contents>
+ *     <line>
+ *         <key>LENS-CENTER</key>
+ *         <value>50 999 руб.</value>
+ *     </line>
+ *     <line>
+ *         <key>Photo-Optic.ru</key>
+ *         <value>32 500 руб.</value>
+ *     </line>
+ * </Contents>
+ */
+
+/**
+  * @example
+  * <Contents>
+  *     <line href="/">
+  *         <key>LENS-CENTER</key>
+  *         <value>50 999 руб.</value>
+  *     </line>
+  *     <line href="/">
+  *         <key>Photo-Optic.ru</key>
+  *         <value>32 500 руб.</value>
+  *     </line>
+  * </Contents>
+  */

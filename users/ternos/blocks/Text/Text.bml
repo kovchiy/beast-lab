@@ -1,0 +1,8 @@
+Beast.decl({
+    Text: {
+        inherits: ['Typo'],
+        mod: {
+            type: 'default',    // hint
+        }
+    }
+})

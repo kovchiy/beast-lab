@@ -1,0 +1,51 @@
+/**
+ * @block Radiobutton Радиокнопка
+ * @dep controlform
+ * @tag control
+ * @ext ControlForm
+ */
+Beast.decl({
+    Radiobutton: {
+        inherits: 'ControlForm',
+        mod: {
+            State: 'release',  // @mod State {release! active} Состояние
+        },
+        param: {
+            group: ''  // @param group
+        },
+        on: {
+            // @event Release Произошло нажатие
+            Release: function () {
+                this.mod('State', 'active')
+            },
+        },
+        onMod: {
+            State: {
+                active: function () {
+                    this.triggerWin('active', this)
+                }
+            }
+        },
+        onWin: {
+            'Radiobutton:active': function (e, source) {
+                if (this !== source && this.param('group') === source.param('group')) {
+                    this.mod('State', 'release')
+                }
+            }
+        },
+        expand: function fn () {
+            this.inherited(fn)
+                .append(
+                    <box>
+                        <check/>
+                    </box>,
+                    this.text() && <label>{Typo.trimSpaces(this.text())}</label>
+                )
+        }
+    }
+})
+
+/**
+ * @example
+ * <Radiobutton>ВКонтакте</Radiobutton>
+ */

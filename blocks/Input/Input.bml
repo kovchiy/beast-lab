@@ -1,0 +1,145 @@
+/**
+ * @block Input Поле ввода
+ * @dep grid ControlForm typo
+ * @tag control
+ * @ext ControlForm Grid
+ */
+
+Beast.decl({
+    Input: {
+        inherits:['Grid', 'ControlForm'],
+        mod: {
+            Col: 'max',   // @mod Col {max* 1 2 3 ...} Размер по ширине (см. блок #Grid)
+            DataType: '', // number
+        },
+        param: {
+            readonly: '',       // @param readonly {boolean} запретить редактирование
+            placeholder: '',    // @param placeholder {string}
+            originValue: '',    // @param originValue {}
+            formattedValue: '', // @param formattedValue {}
+            tooltip: '', // @param tooltip {string} подсказка
+        },
+        expand: function fn () {
+            this.inherited(fn)
+
+            var input = <input/>
+
+            this.append(
+                input,
+                <clear/>
+            )
+
+            if (this.param('value')) {
+                input.domAttr('value', this.param('value'))
+            }
+            if (this.param('readonly')) {
+                input.domAttr('readonly', this.param('readonly'))
+            }
+            if (this.param('placeholder')) {
+                input.domAttr('placeholder', this.param('placeholder'))
+            }
+
+            if (this.param('type')) {
+                this.mod('DataType', this.param('type'))
+
+                if (this.param('type') === 'date') {
+                    if (MissEvent.mobile) {
+                        input.domAttr('type', this.param('type'))
+                    }
+                }
+            }
+        },
+        domInit: function fn () {
+            this.inherited(fn)
+
+            if (this.mod('DataType') === 'number') {
+                this.formatNumber()
+
+                this.on('Focus', function () {
+                        this.value(
+                            this.param('originValue')
+                        )
+                    })
+                    .on('Blur', function () {
+                        this.formatNumber()
+                    })
+                    .on('input', function () {
+                        this.param('formattedValue', '')
+                    })
+            }
+
+            this.checkIfEmpty()
+        },
+        /**
+         * @method value Обновить значение параметра value
+         * @arg value {string}
+         * @arg focus {boolean}
+         */
+        value: function (value, focus) {
+            if (typeof value === 'undefined') {
+                return this.elem('input')[0].domNode().value
+            } else {
+                this.elem('input')[0].domNode().value = value
+
+                if (focus) {
+                    this.elem('input')[0].domNode().focus()
+                }
+
+                this.checkIfEmpty()
+            }
+        },
+        // @method focus Установить фокус в поле
+        focus: function () {
+            this.elem('input')[0].domNode().focus()
+        },
+        formatNumber: function () {
+            this.param('originValue', this.value())
+
+            if (this.param('formattedValue') === '') {
+                this.param(
+                    'formattedValue',
+                    Typo.formatNumber(this.value())
+                )
+            }
+
+            if (this.param('formattedValue') !== '') {
+                this.value(
+                    this.param('formattedValue')
+                )
+            }
+        },
+        // @method checkIfEmpty Скрыть или показать крестик
+        checkIfEmpty: function () {
+            this.mod('empty', this.value() === '')
+        }
+    },
+    Input__input: {
+        inherits: 'Typo',
+        mod: {
+            Text: 'M'
+        },
+        tag:'input',
+        on: {
+            focus: function() {
+                this.parentBlock().mod('focus', true)
+            },
+            blur: function() {
+                this.parentBlock().mod('focus', false)
+            },
+            input: function () {
+                this.parentBlock().checkIfEmpty()
+            }
+        }
+    },
+    Input__clear: {
+        inherits: 'Control',
+        on: {
+            Release: function () {
+                this.parentBlock().value('', true)
+            }
+        }
+    }
+})
+
+// @example <Input Col="4" placeholder="Email"/>
+// @example <Input placeholder="Email" value="portman.yandex.ru" tooltip="Странная почта"/>

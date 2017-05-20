@@ -1,0 +1,40 @@
+.MapThumb
+    position relative
+    background center center repeat color-map
+    display inline-block
+    vertical-align top
+
+    &:after
+        content ''
+        display block
+
+    &_ratio
+        &_1x1:after
+            padding-bottom 100%
+        &_1x2:after
+            padding-bottom 200%
+        &_2x1:after
+            padding-bottom 50%
+        &_2x3:after
+            padding-bottom 150%
+        &_3x2:after
+            padding-bottom 66.67%
+        &_3x4:after
+            padding-bottom 133.33%
+        &_4x3:after
+            padding-bottom 75%
+        &_16x10:after
+            padding-bottom 62.5%
+
+    &_rounded
+        border-radius radius-inside
+
+    &__pin
+        width 28px
+        height 28px
+        position absolute
+        background center center no-repeat @css{url(i/pin.svg)}
+        margin-top -14px
+        margin-left -14px
+        top 50%
+        left 50%

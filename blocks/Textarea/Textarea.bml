@@ -1,0 +1,101 @@
+/**
+ * @block Textarea Многострочное поле ввода
+ * @dep grid ControlForm typo
+ * @tag control
+ * @ext ControlForm grid
+ */
+Beast.decl({
+    Textarea: {
+        inherits:['Grid', 'ControlForm'],
+        mod: {
+            Col: 'max', // @mod Col {max! 1 2 3 ...} Размер по ширине (см. блок #Grid)
+        },
+        param: {
+            readonly: '',    // @param readonly {boolean} запретить редактирование
+            placeholder: '', // @param placeholder {string} подсказка (исчезает при редактировании)
+            value: '',       // @param value {string} текст по-умолчанию
+            line: 3,         // @param line {number} высота поля
+        },
+        expand: function fn () {
+            this.inherited(fn)
+
+            var textarea = <textarea/>
+
+            this.append(
+                textarea,
+                <clear/>
+            )
+
+            if (this.param('value')) {
+                textarea.append(this.param('value'))
+            }
+            if (this.param('readonly')) {
+                textarea.domAttr('readonly', this.param('readonly'))
+            }
+            if (this.param('placeholder')) {
+                textarea.domAttr('placeholder', this.param('placeholder'))
+            }
+            if (this.param('line')) {
+                textarea.domAttr('rows', this.param('line'))
+            }
+        },
+        domInit: function fn () {
+            this.inherited(fn)
+                .checkIfEmpty()
+        },
+        /**
+         * @method value Обновить значение параметра value
+         * @arg value {string}
+         * @arg focus {boolean}
+         */
+        value: function (value, focus) {
+            if (typeof value === 'undefined') {
+                return this.elem('textarea')[0].domNode().value
+            } else {
+                this.elem('textarea')[0].domNode().value = value
+
+                if (focus) {
+                    this.elem('textarea')[0].domNode().focus()
+                }
+
+                this.checkIfEmpty()
+            }
+        },
+        // @method focus Установить фокус в поле
+        focus: function () {
+            this.elem('textarea')[0].domNode().focus()
+        },
+        // @method checkIfEmpty Скрыть или показать крестик
+        checkIfEmpty: function () {
+            this.mod('empty', this.value() === '')
+        },
+    },
+    Textarea__textarea: {
+        inherits: 'Typo',
+        mod: {
+            Text: 'M',
+        },
+        tag: 'textarea',
+        on: {
+            focus: function() {
+                this.parentBlock().mod('focus', true)
+            },
+            blur: function() {
+                this.parentBlock().mod('focus', false)
+            },
+            input: function () {
+                this.parentBlock().checkIfEmpty()
+            }
+        }
+    },
+    Textarea__clear: {
+        inherits: 'Control',
+        on: {
+            Release: function () {
+                this.parentBlock().value('', true)
+            }
+        }
+    }
+})
+
+// @example <Textarea placeholder="Ваш комментарий..."/>

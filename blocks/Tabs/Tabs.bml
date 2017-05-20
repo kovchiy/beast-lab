@@ -1,0 +1,262 @@
+/**
+ * @block Tabs Табы
+ * @dep grid typo
+ * @tag control
+ * @ext grid
+ */
+Beast.decl({
+    Tabs: {
+        inherits: 'Grid',
+        mod: {
+            UnmarginX: true,
+            AdaptiveHeight: false,
+        },
+        param: {
+            selectedFirst: 0,
+            selectedIndex: undefined,
+            selectedItem: undefined,
+        },
+        expand: function () {
+            var tabs = this.get('tab')
+
+            tabs.forEach(function (tab, i) {
+                if (tab.mod('State') === 'selected') {
+                    tab.mod('State', 'release')
+                    this.param('selectedFirst', i)
+                }
+            }.bind(this))
+
+            this.param('maxIndex', tabs.length - 1)
+                .append(
+                    <hidescroll>
+                        <tabs>{tabs}</tabs>
+                    </hidescroll>,
+                    this.has('item') && <items><itemsMove>{this.get('item')}</itemsMove></items>
+                )
+        },
+        domInit: function () {
+            if (this.param('selectedIndex') === undefined) {
+                this.selectTab(this.param('selectedFirst'))
+            }
+        },
+        on: {
+            DidUpdateHeight: '',
+            DidSelectTab: '',
+        },
+        selectTab: function (index) {
+            if (this.param('selectedIndex') === index) {
+                return
+            }
+
+            this.param({
+                selectedIndex: index
+            })
+
+            var selectedItem
+            var selectedTab
+            this.get('hidescroll/tabs/tab', 'items/itemsMove/item').forEach(function (elem) {
+                    if (elem.index() === index) {
+                        elem.mod('state', 'selected')
+                        if (elem._nodeName === 'item') {
+                            selectedItem = elem
+                        } else {
+                            selectedTab = elem
+                        }
+                    } else {
+                        elem.mod('state', 'release')
+                    }
+                })
+
+            this.param({
+                selectedItem: selectedItem
+            })
+
+            if (this.has('items')) {
+                var items = this.get('items')[0]
+                items.align()
+
+                if (this.mod('AdaptiveHeight')) {
+                    items.css('height', selectedItem.domNode().offsetHeight)
+                    this.trigger('DidUpdateHeight')
+                }
+            }
+
+            this.elem('tabs')[0].move(-selectedTab.domNode().offsetLeft)
+            this.trigger('DidSelectTab', index)
+        },
+        getSelectedItem: function () {
+            return this.param('selectedItem')
+        },
+        next: function () {
+            if (this.param('selectedIndex') !== this.param('maxIndex')) {
+                this.selectTab(this.param('selectedIndex') + 1)
+            } else {
+                this.get('items')[0].align()
+            }
+        },
+        prev: function () {
+            if (this.param('selectedIndex') !== 0) {
+                this.selectTab(this.param('selectedIndex') - 1)
+            } else {
+                this.get('items')[0].align()
+            }
+        },
+        firstTabSelected: function () {
+            return this.param('selectedIndex') === 0
+        },
+        lastTabSelected: function () {
+            return this.param('selectedIndex') === this.param('maxIndex')
+        },
+        setSwipeCondition: function (callback) {
+            this.param('swipeCondition', callback)
+        }
+    },
+
+    Tabs__tabs: {
+        inherits: 'Grid',
+        mod: {
+            MarginX:true
+        },
+        move: function (x) {
+            x += parseInt(this.css('padding-left'))
+            x = -x
+
+            var scroll = this.domNode().scrollLeft
+            var direction = scroll > x ? -1 : 1
+            var step = Math.round(Math.abs(scroll - x) / 10)
+
+            var interval = setInterval(function () {
+
+                if (scroll !== x && step !== 0) {
+                    if (direction < 0 && scroll < x || direction > 0 && scroll > x) {
+                        scroll = x
+                    } else {
+                        scroll += direction * step
+                    }
+
+                    this.scrollLeft = scroll
+                } else {
+                    clearInterval(interval)
+                }
+            }.bind(this.domNode()), 10)
+        },
+    },
+
+    Tabs__tab: {
+        inherits: 'Typo',
+        mod: {
+            Caps: true,
+            State:'release'
+        },
+        onMod: {
+            state: {
+                selected: function () {
+                    this.parentBlock().selectTab(this.index())
+                }
+            }
+        },
+        expand: function () {
+            if (this.mod('State') === 'selected') {
+                this.mod('State', 'release').parentBlock().param()
+            }
+        },
+        domInit: function () {
+            MissEvent.tap(this.domNode())
+        },
+        on: {
+            tap: function () {
+                this.mod('state', 'selected')
+            }
+        }
+    },
+
+    Tabs__item: {
+        inherits: 'Grid',
+        mod: {
+            MarginX:true,
+            State: 'release'
+        },
+        noElems:true,
+        expand: function () {
+            if (this.index() === this.parentBlock().param('selectedIndex')) {
+                this.mod('State', 'selected')
+            }
+
+            var that = this
+            this.get('/').forEach(function (child) {
+                child.on('DidRenderState', function () {
+                    if (this.mod('State') === 'selected') {
+                        this.parentBlock().elem('items')[0].css('height', this.domNode().offsetHeight)
+                        this.trigger('DidUpdateHeight')
+                    }
+                }.bind(that))
+            })
+        }
+    },
+
+    Tabs__items: {
+        expand: function () {
+            this._itemsMove = this.get('itemsMove')[0]
+        },
+        domInit: function () {
+            this._initHeight = this.get('itemsMove/item')[0].domNode().offsetHeight
+            this._totalHeight = this.domNode().offsetHeight
+            this.css('height', this._initHeight)
+            MissEvent.horizontalSwipe(this.domNode(), this.parentBlock().param('swipeCondition'))
+        },
+        on: {
+            touchstart: function (e) {
+                this._selectedOffset = -this.parentBlock().param('selectedItem').domNode().offsetLeft
+            },
+            willswipe: function () {
+                this.mod('Moving', true)
+            },
+            swipe: function (e, data) {
+                var delta = data.delta
+
+                if (this.parentBlock().firstTabSelected() && delta > 0 ||
+                    this.parentBlock().lastTabSelected() && delta < 0) {
+                    delta *= data.elasticFactor
+                }
+
+                this.move(delta + this._selectedOffset)
+            },
+            didswipe: function (e, data) {
+                if ((Math.abs(data.delta) < window.innerWidth / 3 || data.delta === 0) &&
+                    !data.isFast) {
+                    this.align()
+                } else {
+                    if (data.delta > 0) {
+                        this.parentBlock().prev()
+                    } else {
+                        this.parentBlock().next()
+                    }
+                }
+            },
+        },
+        align: function () {
+            this.parentBlock().mod('transition', true)
+            this.move(
+                -this.parentBlock().param('selectedItem').domNode().offsetLeft
+            )
+
+            if (!this.parentBlock().mod('AdaptiveHeight') && this._totalHeight && this.parentBlock().param('selectedIndex') !== 0) {
+                this.css('height', this._totalHeight)
+                this._totalHeight = 0
+                this.parentBlock().trigger('DidUpdateHeight')
+            }
+
+            setTimeout(function () {
+                this.parentBlock().mod('transition', false)
+                this.mod('Moving', false)
+            }.bind(this), 200)
+        },
+        move: function (x) {
+            var translate = 'translate3d('+ x +'px,0px,0px)'
+            this._itemsMove.css({
+                transform: translate,
+                '-webkit-transform': translate
+            })
+        },
+    }
+})

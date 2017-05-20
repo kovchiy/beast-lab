@@ -1,0 +1,161 @@
+.PopupMenu
+
+    /**
+     * Mixin
+     */
+    define-theme(theme, text, background, check)
+        &_theme_{theme}
+
+            .popupmenu__items
+                background background * control-foreground-light
+
+            .popupmenu__item
+                color text
+
+                &_mouseover:not(.popupmenu__item_disabled)
+                    background check
+                    color background
+
+                    > .icon
+                        background background
+
+                    > .popupmenu__right
+                        background background
+
+                    &.popupmenu__item_state_active > .popupmenu__tip
+                        background background
+
+            .icon
+                background text
+
+            .popupmenu__right
+                background text
+
+            .popupmenu__item_state_active .popupmenu__tip
+                background text
+
+            .popupmenu__item_disabled
+                disabled-color = mix(background, text, 60%)
+
+                color disabled-color
+
+                .icon
+                    background disabled-color
+
+                .popupmenu__right
+                    background disabled-color
+
+                &.popupmenu__item_state_active
+                    .popupmenu__tip
+                        background disabled-color
+
+    define-shape(platform, size)
+        extra-margin = round(size * control-margin-factor / 1.5)
+
+        &__items
+            border-radius radius-inside
+            padding extra-margin 0
+
+        &__items &__items
+            margin-top - extra-margin
+
+        &__divider
+            margin extra-margin 0
+
+        &__item
+            height size
+            line-height size @css{!important}
+            padding 0 round(size * control-margin-factor)
+
+            &_state_active .popupmenu__tip
+                if platform is touch
+                    mask center center no-repeat @css{url(i/check-16.svg)}
+                if platform is desktop
+                    mask center center no-repeat @css{url(i/check-12.svg)}
+
+        &__right
+            if platform is touch
+                mask right center no-repeat @css{url(i/right-16.svg)}
+            if platform is desktop
+                mask right center no-repeat @css{url(i/right-12.svg)}
+
+        .thumb
+            width size - 8px
+            border-radius radius-inside - 1px
+            margin-right 1ex
+
+
+    /**
+     * Style
+     */
+
+    for theme in control-theme
+        define-theme(
+            theme,
+            control-theme[theme].text,
+            control-theme[theme].background,
+            control-theme[theme].check
+        )
+
+    @media screen-touch
+        define-shape(touch, control-size-m-touch)
+
+    @media screen-desktop
+        define-shape(desktop, control-size-m-desktop)
+
+    display inline-block
+    position absolute
+    z-index 10
+
+    &_state_release
+        display none
+
+    &__items
+        box-shadow:
+            0 1.5ex 2ex -1ex rgba(0,0,0,.3),
+            0 0 0 1px rgba(0,0,0,.05)
+
+    &__items &__items
+        position absolute
+        top 0
+        left 100%
+        margin-left 1px
+
+    &__items_hasToggleItems > &__item
+        padding-left 0
+
+    &__item
+        white-space nowrap
+        position relative
+        cursor pointer
+        display flex
+        justify-content flex-start
+        align-items center
+
+    &__item > &__items
+        display none
+
+    &__item_mouseover > &__items
+        display block
+
+    &__title
+        flex-grow 2
+
+    &__hint
+        flex-grow 0
+        margin-left 2ex
+
+    &__tip
+        flex-grow 0
+        width 4.8ex
+        height 16px
+
+    .icon
+        margin-right .8ex
+        flex-grow 0
+
+    &__right
+        flex-grow 0
+        margin-left 2ex
+        width 16px
+        height 16px

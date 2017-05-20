@@ -1,0 +1,47 @@
+/**
+ * @block Sitelinks Стайлинки
+ * @dep typo link grid Divider
+ * @tag snippet
+ * @ext typo
+ */
+Beast.decl({
+    Sitelinks: {
+        inherits: 'Typo',
+        mod: {
+            Text: 'L', // @mod Text {S M L! XL} Размер шрифта (см. блок #Typo)
+        },
+        expand: function () {
+            this.append(
+                <Divider Size="M"/>
+            )
+
+            this.get('sitelink').forEach(function (sitelink) {
+                this.append(
+                    sitelink,
+                    <Divider Size="M"/>
+                )
+            }.bind(this))
+        }
+    },
+    Sitelinks__sitelink: {
+        inherits: ['Link', 'Grid'],
+        mod: {
+            UnmarginX: true,
+            MarginX: true,
+        },
+        expand: function () {
+            this.append(
+                <label>{this.get()}</label>
+            )
+        }
+    }
+})
+
+/**
+ * @example
+ * <Sitelinks>
+ *     <sitelink>Входящие</sitelink>
+ *     <sitelink>Новое сообщение</sitelink>
+ *     <sitelink>Личный кабинет</sitelink>
+ * </Sitelinks>
+ */

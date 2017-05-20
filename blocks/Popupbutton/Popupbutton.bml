@@ -1,0 +1,59 @@
+/**
+ * @block Popupbutton Кнопка с выпадающим меню
+ * @dep button popupmenu
+ * @tag control
+ */
+Beast.decl({
+    Popupbutton: {
+        mod: {
+            Theme: 'default'
+        },
+        expand: function () {
+            this.append(
+                this.get('button', 'menu')
+            )
+        }
+    },
+    Popupbutton__button: {
+        expand: function () {
+            this.implementWith(
+                <Button Theme="{this.parentBlock().mod('Theme')}">{this.get()}</Button>
+            )
+        }
+    },
+    Popupbutton__menu: {
+        expand: function () {
+            var popupmenu = <Popupmenu Theme="{this.parentBlock().mod('Theme')}">{this.get()}</Popupmenu>
+            popupmenu.bindTo(this.elem('button')[0])
+            this.empty()
+        }
+    }
+})
+
+/**
+ * @example
+ * <Popupbutton>
+ *     <button Col="3">Действия...</button>
+ *     <menu>
+ *         <item thumb="/assets/userpic/01.jpg" title="Danila Kovchiy"/>
+ *         <item title="Recent projects">
+ *             <item icon="File" title="Controls"/>
+ *             <item icon="File" title="Color Forms Final"/>
+ *             <item icon="File" title="Test"/>
+ *             <divider/>
+ *             <item title="Clear menu"/>
+ *         </item>
+ *         <divider/>
+ *         <item hint="⇧⌘P" title="Command palette"/>
+ *         <item title="Snippets"/>
+ *         <divider/>
+ *         <item hint="⌥⌘W" State="active" title="Switch project in window"/>
+ *         <item icon="Filter" hint="⌘F" State="active" title="Filter project"/>
+ *         <item Disabled hint="⇧⌘C" State="active" title="Close project"/>
+ *         <item Disabled title="Edit project"/>
+ *         <divider/>
+ *         <item icon="Edit" Disabled title="Add folder to project..."/>
+ *         <item title="Remove all folders from project"/>
+ *     </menu>
+ * </Popupbutton>
+ */

@@ -1,0 +1,107 @@
+/**
+ * @block HorizontalScroll Обертка для нативного горизонтального скролла
+ * @dep grid
+ * @tag base
+ * @ext grid
+ */
+Beast.decl({
+    HorizontalScroll: {
+        inherits: 'Grid',
+        mod: {
+            UnmarginX: false,
+            State: 'release',
+            ShowArrows: false,
+            Nomargin: false,
+        },
+        onMod: {
+            state: {
+                scrolled: function () {
+                    this.css('margin-right', '')
+                }
+            }
+        },
+        onWin: {
+            resize: function () {
+                this.checkOverflowShow()
+            }
+        },
+        expand: function () {
+            this.mod('UnmarginX', !this.mod('Nomargin'))
+
+            this.checkArrowVisibility()
+            this.append(
+                <scrollContainer>
+                    <scroll>
+                        <scrollContent>{this.get()}</scrollContent>
+                    </scroll>
+                </scrollContainer>
+                // this.mod('ShowArrows') &&  <right/>
+            )
+        },
+        domInit: function () {
+            this.storeWidth()
+            this.checkOverflowShow()
+            requestAnimationFrame(this.checkWidthChange.bind(this))
+        },
+        storeWidth: function () {
+            this.param({
+                contentWidth: this.elem('scrollContent')[0].domNode().offsetWidth,
+                containerWidth: this.parentNode().domNode().offsetWidth,
+            })
+        },
+        checkWidthChange: function () {
+            if (document.readyState !== 'complete') {
+                requestAnimationFrame(this.checkWidthChange.bind(this))
+            } else {
+                this.storeWidth()
+                this.checkOverflowShow()
+            }
+        },
+        checkArrowVisibility: function () {
+            if (this.mod('ShowArrows')) {
+                var ctx = this.parentNode()
+                var isInsideUnmargin = false
+                while (!isInsideUnmargin && ctx) {
+                    if (
+                        ctx.isKindOf('Grid') && ( ctx.mod('Unmargin') || ctx.mod('UnmarginX') )
+                        || ctx.isKindOf('Snippet')
+                    ) {
+                        isInsideUnmargin = true
+                    }
+                    ctx = ctx.parentNode()
+                }
+
+                if (!isInsideUnmargin) {
+                    this.css('margin-right', 0)
+                }
+            }
+        },
+        checkOverflowShow: function () {
+            var scrollLeft = this.elem('scroll')[0].domNode().scrollLeft
+            this.mod({
+                // could not figure out where goes 2 pixels
+                showOverflowRight: scrollLeft + this.param('containerWidth') < this.param('contentWidth') - 2,
+                showOverflowLeft: scrollLeft > 0
+            })
+        },
+    },
+    HorizontalScroll__scroll: {
+        inherits:'Grid',
+        mod: {
+            MarginX:false
+        },
+        on: {
+            scroll: function () {
+                requestAnimationFrame(function () {
+                    this.parentBlock().mod('State', 'scrolled').checkOverflowShow()
+                }.bind(this))
+            }
+        },
+        expand: function () {
+            this.mod('MarginX', !this.parentBlock().mod('Nomargin'))
+        }
+    },
+    HorizontalScroll__scrollContent: {
+        noElems: true
+    }
+})

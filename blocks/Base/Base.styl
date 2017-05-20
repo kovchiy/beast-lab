@@ -1,0 +1,206 @@
+/**
+ * Screens
+ */
+screen-desktop = 'screen and (min-width: 1025px)'
+screen-touch =   'screen and (max-width: 1024px)'
+screen-tablet =  'screen and (min-width: 768px) and (max-width: 1024px)'
+screen-phone =   'screen and (max-width: 599px)'
+
+screen-desktop-1460 = 'screen and (min-width: 1460px)'
+screen-desktop-1280 = 'screen and (min-width: 1280px) and (max-width: 1459px)'
+screen-desktop-980  = 'screen and (min-width: 1025px) and (max-width: 1279px)'
+
+screen-tablet-1024 = 'screen and (width: 1024px)'
+screen-tablet-960 =  'screen and (min-width: 960px) and (max-width: 1023px)'
+screen-tablet-768 =  'screen and (min-width: 768px) and (max-width: 959px)'
+
+screen-phone-667 = 'screen and (min-width: 667px) and (max-width: 767px)'
+screen-phone-600 = 'screen and (min-width: 600px) and (max-width: 666px)'
+screen-phone-568 = 'screen and (min-width: 568px) and (max-width: 599px)'
+screen-phone-540 = 'screen and (min-width: 540px) and (max-width: 567px)'
+screen-phone-480 = 'screen and (min-width: 480px) and (max-width: 539px)'
+screen-phone-414 = 'screen and (min-width: 414px) and (max-width: 479px)'
+screen-phone-412 = 'screen and (min-width: 412px) and (max-width: 413px)'
+screen-phone-411 = 'screen and (min-width: 411px) and (max-width: 411px)'
+screen-phone-384 = 'screen and (min-width: 384px) and (max-width: 410px)'
+screen-phone-375 = 'screen and (min-width: 375px) and (max-width: 413px)'
+screen-phone-360 = 'screen and (min-width: 360px) and (max-width: 374px)'
+screen-phone-320 = 'screen and (min-width: 320px) and (max-width: 359px)'
+
+/**
+ * Constants
+ */
+color-action = #fc0
+color-check = #555
+color-link = #04b
+color-url = #070
+color-hint = #999
+color-map = #F2E8C2
+
+alpha-text = .32
+alpha-border = .1
+alpha-icon = .15
+alpha-dark-factor = 1.75
+
+radius-inside = 4px
+radius-outside = 6px
+
+/*
+ * Control
+ */
+
+// Размеры
+control-size-m-touch = 44px
+control-size-s-touch = 28px
+control-size-xs-touch = 20px
+control-size-m-desktop = 36px
+control-size-s-desktop = 24px
+control-size-xs-desktop = 18px
+
+control-margin-factor = 0.35 // горизонтальный отступ относительно высоты контрола
+control-margin-touch = 4px // толщина стенок на мобильном
+control-margin-desktop = 3px // толщина стенок на десктопе
+
+control-hover = 0.95 // затемнение ховера
+control-foreground-light = 1.08 // высветление внутренней поверхности контурной области
+
+// Множители цвета контура
+control-border-light = 0.85
+control-border-mid = 0.75
+control-border-dark = 1.9
+
+// Множители цвета фона
+control-background-light = 0.9
+control-background-mid = 0.8
+control-background-dark = 1.75
+
+// Множители цвета фокуса
+control-focus-light = 0.7
+control-focus-mid = 1.4
+control-focus-dark = 3
+
+// Множители цвета второстепенных элементов
+control-hint-light = 0.8
+control-hint-mid = 1.2
+control-hint-dark = 3
+
+// Множители цвета неактивного элемента
+control-disable-light = 0.95
+control-disable-mid = 0.9
+control-disable-dark = 1.25
+
+// Темы
+control-theme = {
+    default: {
+        text: #000
+        background: #FFF
+        action: color-action
+        check: color-check
+    }
+    whiteOnRed: {
+        text: #FFF
+        background: #C62828
+        action: #FFF
+        check: #FFF
+    }
+    blueOnGrey: {
+        text: #000
+        background: #f5f5f5
+        action: #2196F3
+        check: #2196F3
+    }
+    whiteOnBlack: {
+        text: #ECEFF1
+        background: #263238
+        action: #ECEFF1
+        check: #ECEFF1
+    }
+    whiteOnBlue: {
+        text: #FFF
+        background: #1E88E5
+        action: #FFF
+        check: #FFF
+    }
+    blackOnYellow: {
+        text: #000
+        background: #FFEA00
+        action: #111
+        check: #111
+    }
+}
+
+/**
+ * Util
+ */
+select(type = none text) // Выделение текста
+    -webkit-user-select type
+    user-select type
+    if type is none
+        cursor default
+    if type is text
+        cursor text
+
+touch-scroll(direction = x y) // Нативный скролл
+    if direction is x
+        white-space nowrap
+        overflow-x auto
+        overflow-y visible
+        -webkit-overflow-scrolling touch
+        overflow-scrolling touch
+        &::-webkit-scrollbar
+        &::scrollbar
+            display none
+    if direction is y
+        overflow-x hidden
+        overflow-y auto
+        -webkit-overflow-scrolling touch
+        overflow-scrolling touch
+        &::-webkit-scrollbar
+        &::scrollbar
+            display none
+
+touch-highlight(value = none) // Подсветка области касания
+    if value is none
+        -webkit-tap-highlight-color transparent
+        tap-highlight-color transparent
+        appearance none
+        -webkit-appearance none
+
+ellipsis(type = nowrap wrap) // Обрезание текста многоточием
+    if type is nowrap
+        white-space nowrap
+        overflow-x hidden
+        overflow-y visible
+        text-overflow ellipsis
+    if type is wrap
+        overflow-x hidden
+        overflow-y visible
+        text-overflow ellipsis
+
+background-text(background-color, blend = 98%) // Подбор цвета текста под фон
+    text-color = luminosity(background-color) > .5 ? #000 : #FFF
+    color mix(text-color, background-color, blend)
+
+control-focus(color)
+    box-shadow inset 0 0 0 2px color
+
+control-style(type = none)
+    if type is none
+        touch-highlight none
+        border none
+        background none
+        border-radius 0
+        box-sizing border-box
+        color inherit
+        &:focus
+            outline none
+
+is-light-color(color)
+    luminosity(color) > .3
+
+is-mid-color(color)
+    lum = luminosity(color)
+    lum <= .3 and lum > .1
+
+is-dark-color(color)
+    luminosity(color) <= .1

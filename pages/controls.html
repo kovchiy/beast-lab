@@ -1,0 +1,188 @@
+<meta charset="utf8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<script type="text/javascript" src="../build/build.js"></script>
+<link type="text/css" rel="stylesheet" href="../build/build.css">
+
+<title>Контролы</title>
+
+<style>
+    .example_theme_whiteOnRed {
+        background:#C62828;
+    }
+    .example_theme_blueOnGrey {
+        background:#f5f5f5;
+    }
+    .example_theme_whiteOnBlack {
+        background:#263238;
+    }
+    .example_theme_whiteOnBlue {
+        background:#1E88E5;
+    }
+    .example_theme_blackOnYellow {
+        background:#FFEA00;
+    }
+</style>
+
+<script>
+    var themes = ['default', 'whiteOnRed', 'blueOnGrey', 'whiteOnBlack', 'whiteOnBlue', 'blackOnYellow']
+</script>
+
+<script type="bml">
+    <App>
+        {
+            themes.map(function (theme, i) {
+                return (
+                    <Example Theme="{theme}">
+                        <Grid Rows MarginY Center Col="max">
+                            <Row>
+                                <Popupbutton Theme="{theme}">
+                                    <button Col="3">Действия...</button>
+                                    <menu>
+                                        <item thumb="/assets/userpic/01.jpg" title="Danila Kovchiy"/>
+                                        <item title="Recent projects">
+                                            <item icon="File" title="Controls"/>
+                                            <item icon="File" title="Color Forms Final"/>
+                                            <item icon="File" title="Test"/>
+                                            <divider/>
+                                            <item title="Clear menu"/>
+                                        </item>
+                                        <divider/>
+                                        <item hint="⇧⌘P" title="Command palette"/>
+                                        <item title="Snippets"/>
+                                        <divider/>
+                                        <item hint="⌥⌘W" State="active" title="Switch project in window"/>
+                                        <item icon="Filter" hint="⌘F" State="active" title="Filter project"/>
+                                        <item Disabled hint="⇧⌘C" State="active" title="Close project"/>
+                                        <item Disabled title="Edit project"/>
+                                        <divider/>
+                                        <item icon="Edit" Disabled title="Add folder to project..."/>
+                                        <item title="Remove all folders from project"/>
+                                    </menu>
+                                </Popupbutton>
+                            </Row>
+                            <Row>
+                                <Button Theme="{theme}" Col="4">Трейлер</Button>
+                            </Row>
+                            <Row>
+                                <Button Theme="{theme}" Col="4" icon="Handset">Позвонить</Button>
+                            </Row>
+                            <Row>
+                                <Button Theme="{theme}" Col="4" Action>Трейлер</Button>
+                            </Row>
+                            <Row>
+                                <Button Theme="{theme}" Col="4" Disabled>Трейлер</Button>
+                            </Row>
+                            <Row>
+                                <Button Theme="{theme}" Col="4" Loading>Сохранить</Button>
+                            </Row>
+                            <Row>
+                                <Button Theme="{theme}" Size="S">Бесплатно</Button>
+                            </Row>
+                            <Row>
+                                <Divider Theme="{theme}"/>
+                            </Row>
+                            <Row>
+                                <Input Theme="{theme}" Col="max" placeholder="Адрес"/>
+                            </Row>
+                            <Row>
+                                <Input Theme="{theme}" Col="max" placeholder="Адрес" value="льва толстого 16"/>
+                            </Row>
+                            <Row>
+                                <Input Theme="{theme}" Col="max" placeholder="Адрес" Disabled/>
+                            </Row>
+                            <Row>
+                                <Input Theme="{theme}" Col="max" placeholder="Адрес" value="льва толстого 16" Disabled/>
+                            </Row>
+                            <Row>
+                                <Divider Theme="{theme}"/>
+                            </Row>
+                            <Row>
+                                <Select Theme="{theme}">
+                                    <option>Elektron Analog Four</option>
+                                    <option>Korg Volca Beats</option>
+                                    <option>Traktor Kontrol S4</option>
+                                </Select>
+                            </Row>
+                            <Row>
+                                <Divider Theme="{theme}"/>
+                            </Row>
+                            <Row>
+                                <Checkbutton Theme="{theme}" Cell Col="3">Wi-Fi</Checkbutton><Checkbutton Theme="{theme}" Cell Col="3" State="active">24 часа</Checkbutton>
+                            </Row>
+                            <Row>
+                                <Divider Theme="{theme}"/>
+                            </Row>
+                            <Row>
+                                <Switch Theme="{theme}">Анонимный режим</Switch>
+                            </Row>
+                            <Row>
+                                <Switch Theme="{theme}" State="active">Поддержка Python 3</Switch>
+                            </Row>
+                            <Row>
+                                <Divider Theme="{theme}"/>
+                            </Row>
+                            <Row>
+                                <Checkbox Theme="{theme}">Чужой компьютер</Checkbox>
+                            </Row>
+                            <Row>
+                                <Checkbox Theme="{theme}" State="active">Присылать спам</Checkbox>
+                            </Row>
+                            <Row>
+                                <Divider Theme="{theme}"/>
+                            </Row>
+                            <Row>
+                                <Radiogroup Theme="{theme}" Col="max">
+                                    <option State="active">Bass</option>
+                                    <option>Mid</option>
+                                    <option>High</option>
+                                </Radiogroup>
+                            </Row>
+                            <Row>
+                                <Radiogroup Theme="{theme}" Col="max">
+                                    <option>Топ</option>
+                                    <option State="active">Рядом со мной</option>
+                                </Radiogroup>
+                            </Row>
+                            <Row>
+                                <Divider Theme="{theme}"/>
+                            </Row>
+                            <Row>
+                                <Radiobutton Theme="{theme}" group="{i}">Человек</Radiobutton>
+                            </Row>
+                            <Row>
+                                <Radiobutton Theme="{theme}" group="{i}" State="active">Компьютер</Radiobutton>
+                            </Row>
+                            <Row>
+                                <Divider Theme="{theme}"/>
+                            </Row>
+                            <Row>
+                                <Textarea Theme="{theme}" placeholder="Хоть полстрочки напиши"/>
+                            </Row>
+                            <Row>
+                                <Textarea Theme="{theme}" placeholder="Хоть полстрочки напиши" value="Don't come back\nCause I might just save you\nBaby don't come back"/>
+                            </Row>
+                            <Row>
+                                <Textarea Disabled Theme="{theme}" placeholder="Хоть полстрочки напиши"/>
+                            </Row>
+                            <Row>
+                                <Textarea Disabled Theme="{theme}" placeholder="Хоть полстрочки напиши" value="Don't come back\nCause I might just save you\nBaby don't come back"/>
+                            </Row>
+                            <Row>
+                                <Divider Theme="{theme}"/>
+                            </Row>
+                            <Row>
+                                <Slider Theme="{theme}" value="0.4"/>
+                            </Row>
+                            <Row>
+                                <Slider Theme="{theme}" Fill value="0.6"/>
+                            </Row>
+                        </Grid>
+                    </Example>
+                )
+            })
+        }
+    </App>
+</script>
+<body/>

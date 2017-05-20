@@ -1,0 +1,51 @@
+/**
+ * @block ControlGroup Сгруппированные контролы
+ * @dep HorizontalScroll
+ * @tag control
+ */
+Beast.decl({
+    ControlGroup: {
+        mod: {
+            Mode: 'justify', // @mod Mode {justify! line} С переном на новую строку или горизонтальным скроллом 
+        },
+        expand: function () {
+            var controls = this.get('/')
+
+            if (this.mod('mode') === 'justify') {
+                this.append(
+                    <justify>{controls}</justify>.noElems()
+                )
+            }
+            else if (this.mod('mode') === 'line') {
+                this.noElems()
+                this.append(
+                    <HorizontalScroll>{controls}</HorizontalScroll>
+                )
+            }
+        }
+    },
+    ControlGroup__justify: {
+        noElems: true
+    }
+})
+
+/**
+ * @example
+ * <ControlGroup Mode="justify">
+ *     <Checkbutton>Телефон</Checkbutton>
+ *     <Checkbutton State="active">Wi-Fi</Checkbutton>
+ *     <Checkbutton>Корейская кухня</Checkbutton>
+ *     <Checkbutton State="active">Не просят чаевых</Checkbutton>
+ *     <Checkbutton State="active">Фейсконтроль</Checkbutton>
+ * </ControlGroup>
+ */
+
+/**
+* @example
+* <ControlGroup Mode="line">
+*     <Checkbutton>Телефон</Checkbutton>
+*     <Checkbutton State="active">Wi-Fi</Checkbutton>
+*     <Checkbutton State="active">Фейсконтроль</Checkbutton>
+*     <Checkbutton>Корейская кухня</Checkbutton>
+* </ControlGroup>
+*/

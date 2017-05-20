@@ -1,0 +1,16 @@
+/**
+ * @block Medal Олимпийские медали
+ * @tag icon
+ */
+Beast.decl({
+    Medal: {
+        mod: {
+            Size: 'S', // @mod Size {XS S! M L} Размер
+            Place: 1,  // @mod Place {1! 2 3} За какое место
+        }
+    }
+})
+
+// @example <Medal Place="1" />
+// @example <Medal Place="2" />
+// @example <Medal Place="3" />

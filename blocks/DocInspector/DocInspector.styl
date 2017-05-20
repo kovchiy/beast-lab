@@ -1,0 +1,33 @@
+.DocInspector
+
+    border-color = #2196F3
+    border-width = 3px
+
+    /**
+     * Style
+     */
+    font-family monaco, monospace
+    font-size 12px
+
+    &__frame
+        display none
+        position absolute
+        box-shadow 0 0 0 border-width border-color
+        z-index 999
+        &_state
+            &_active
+                background border-color
+                opacity .3
+                .DocInspector__frameLabel
+                    display none
+        &_visible
+            display block
+
+    &__frameLabel
+        text-shadow 0 1px #FFF
+        font-size 12px
+        color border-color
+        position absolute
+        line-height 12px
+        bottom -18
+        margin-left - border-width

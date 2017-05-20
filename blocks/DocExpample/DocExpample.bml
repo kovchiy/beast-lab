@@ -1,0 +1,36 @@
+/**
+ * @block DocExample Контейнер для примеров
+ * @ext grid
+ */
+Beast.decl({
+    DocExample: {
+        inherits: 'Grid',
+        mod: {
+            wrap: true,
+        },
+        expand: function () {
+            var block = Beast.evalBML(MissEvent.qs('bml'))
+
+            this.append(block)
+
+            if (block.mod('Unmargin')) {
+                this.mod('Margin', true)
+                    .mod('border', true)
+            }
+            else if (block.mod('UnmarginX')) {
+                this.mod('MarginX', true)
+                    .mod('border', true)
+            }
+            else if (block.mod('UnmarginY')) {
+                this.mod('MarginY', true)
+                    .mod('border', true)
+            }
+
+            if (!this.mod('border')) {
+                if (!block.mod('margin') && !block.mod('marginx') && !block.mod('marginy')) {
+                    this.mod('margin', true)
+                }
+            }
+        },
+    }
+})

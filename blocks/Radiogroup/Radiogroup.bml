@@ -1,0 +1,83 @@
+/**
+ * @block Radiogroup Радиогруппа
+ * @dep controlform
+ * @tag control
+ * @ext ControlForm
+ */
+Beast.decl({
+    Radiogroup: {
+        inherits: 'ControlForm',
+        expand: function () {
+            var options = this.get('option')
+            this.append(
+                    <pointer/>,
+                    options
+                )
+                .param('optionWidth', (100 / options.length) + '%')
+        }
+    },
+    Radiogroup__option: {
+        inherits: 'Control',
+        mod: {
+            State: 'release'
+        },
+        expand: function () {
+            this.css('width', this.parentBlock().param('optionWidth'))
+        },
+        on: {
+            Release: function () {
+                this.mod('State', 'active')
+            }
+        },
+        onWin: {
+            resize: function () {
+                this.transformPointer()
+            }
+        },
+        onMod: {
+            State: {
+                active: function () {
+                    this.parentBlock().elem('option').forEach(function (option) {
+                        if (option !== this) {
+                            option.mod('State', 'release')
+                        }
+                    }.bind(this))
+
+                    this.transformPointer()
+                }
+            }
+        },
+        transformPointer: function () {
+            requestAnimationFrame(function () {
+                var pointer = this.parentBlock().elem('pointer')[0]
+                var pointerMargin = parseInt(pointer.css('top'))
+
+                pointer
+                    .css({
+                        transform: 'translateX(' + (this.domNode().offsetLeft + pointerMargin) + 'px)',
+                        width: (this.domNode().offsetWidth - pointerMargin * 2),
+                    })
+
+                if (!pointer.param('transitionFlag')) {
+                    pointer.param('transitionFlag', true)
+                } else {
+                    pointer.mod('Transition', true)
+                }
+            }.bind(this))
+        }
+    },
+    Radiogroup__pointer: {
+        mod: {
+            Transition: false
+        }
+    }
+})
+
+/**
+ * @example
+ * <Radiogroup Col="max">
+ *     <option State="active">Bass</option>
+ *     <option>Mid</option>
+ *     <option>High</option>
+ * </Radiogroup>
+ */

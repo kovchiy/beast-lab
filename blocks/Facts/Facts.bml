@@ -1,0 +1,87 @@
+/**
+ * @block Facts Список ключ-значение
+ * @dep typo
+ * @tag fact geo oo
+ * @ext typo
+ */
+Beast.decl({
+    Facts: {
+        inherits: 'Typo', // @inherits Typo
+        mod: {
+            Theme: 'web',   // @mod Theme {web} ?
+            Text: 'M',      // @mod Text {S M! L XL} Размер текста (см. блок #Typo)
+        },
+        expand: function () {
+            this.append(
+                <HorizontalScroll>{this.get()}</HorizontalScroll>
+            )
+        }
+    },
+    Facts__fact: {
+        expand: function () {
+            var comaSeparatedValues = []
+            this.get('value', 'values/value').forEach(function (value) {
+                comaSeparatedValues.push(value, ', ')
+            })
+            comaSeparatedValues.pop()
+
+            this.append(
+                this.get('title'),
+                comaSeparatedValues
+            )
+        }
+    },
+    Facts__title: {
+        expand: function () {
+            this.append(this.text() + ': ')
+        }
+    },
+    Facts__value: {
+        expand: function () {
+            if (this.param('href')) {
+                this.implementWith(
+                    <Link href="{this.param('href')}">{this.text()}</Link>
+                )
+            }
+
+            if (this.get('/').length > 0) {
+                this.append(this.get('/'))
+            }
+        }
+    },
+})
+
+/**
+ * @example
+ * <Facts>
+ *     <fact>
+ *         <title>Сайт</title>
+ *         <value href="#">xxc.ru</value>
+ *     </fact>
+ *     <fact>
+ *         <title>Адрес</title>
+ *         <value href="#">Москва, ул. Волхонка, 15</value>
+ *     </fact>
+ *     <fact>
+ *         <title>Метро</title>
+ *         <value>
+ *             <MetroStation Line="1">Кропоткинская</MetroStation>
+ *         </value>
+ *         <value>
+ *             <MetroStation Line="9">Боровицкая</MetroStation>
+ *         </value>
+ *         <value>
+ *             <MetroStation Line="1">Библиотека им. Ленина</MetroStation>
+ *         </value>
+ *     </fact>
+ *     <fact>
+ *         <title>Телефон</title>
+ *         <value href="#">+7 495 637 12 76</value>
+ *         <value href="#">+7 495 637 11 57</value>
+ *     </fact>
+ *     <fact>
+ *         <title>Открыто</title>
+ *         <value>Ежедневно, 8:00—18:30</value>
+ *     </fact>
+ * </Facts>
+ */

@@ -1,0 +1,30 @@
+/**
+ * @block Locale Локализация
+ * @tag base
+ */
+Beast.decl({
+    Locale: {
+        abstract: true,
+        param: {
+            locale: '',
+        },
+        locale: {
+            ru: {},
+            en: {},
+            tr: {},
+            ua: {},
+            by: {},
+            kz: {},
+            de: {},
+        },
+        string: function (key) {
+            if (this.param('locale') === '') {
+                this.param('locale', 'ru') //TODO: Get somehow
+            }
+
+            return this.locale[this.param('locale')][key] || console.error(
+                'Locale: Can\'t found "' + key + '" in locale "' + this.param('locale') + '"'
+            )
+        }
+    }
+})

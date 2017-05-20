@@ -1,0 +1,30 @@
+/**
+ * @block Checkbox Чекбокс
+ * @dep controlform
+ * @tag control
+ * @ext ControlForm
+ */
+Beast.decl({
+    Checkbox: {
+        inherits: 'ControlForm',
+        mod: {
+            State: 'release' // @mod State {active release!} Выбран / не выбран
+        },
+        expand: function fn () {
+            this.inherited(fn)
+                .append(
+                    <box>
+                        <check/>
+                    </box>,
+                    this.text() && <label>{Typo.trimSpaces(this.text())}</label>
+                )
+        },
+        on: {
+            Release: function () {
+                this.toggleMod('State', 'release', 'active')
+            }
+        }
+    }
+})
+
+// @example <Checkbox State="active">Сохранить пароль</Checkbox>

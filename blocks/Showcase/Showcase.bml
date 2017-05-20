@@ -1,0 +1,205 @@
+/**
+ * @block Showcase Витрина
+ * @dep grid HorizontalScroll grid link typo Rating VideoThumb price
+ * @tag oo video
+ * @ext grid
+ */
+Beast.decl({
+    Showcase: {
+        inherits:'Grid',
+        mod: {
+            ItemRatio:'',       // @mod ItemRatio {2x3} пропорция ячеек (Ratio у #Thumb)
+            ItemCol:'',         // @mod ItemCol {number} ширина ячеек в колонках (Col у #Grid)
+            ItemFit:'cover',    // @mod ItemFit {cover} позиционирование картинки (Fit у #Thumb)
+            ItemRounded:false,  // @mod ItemRounded {boolean} скругление картинки (Rounded у #Thumb)
+            ItemShadow:false,   // @mod ItemShadow {boolean} тень картинки (Shadow у #Thumb)
+            Scroll: false,      // @mod Scroll {boolean} Показывать стрелки для листания
+            Layout: 'scroll',   // @mod Layout {scroll! tile} Лейаут каруселью или плиткой
+            ColorWiz: false,    // @mod ColorWiz {boolean} Красит текст ячейки в цветами из картинки
+        },
+        expand: function () {
+            this.append(
+                this.mod('Layout') === 'scroll'
+                    ? <HorizontalScroll ShowArrows>{this.get('item')}</HorizontalScroll>
+                    : <items>{this.get('item')}</items>
+            )
+        }
+    },
+
+    /**
+     * @elem Showcase__item Ячейка
+     * @ext grid link
+     */
+    Showcase__item: {
+        inherits:['Grid', 'Link'],
+        expand: function () {
+            if (this.parentBlock().mod('Layout') === 'scroll') {
+                this.mod('Cell', true)
+            } else {
+                this.mod('Tile', true)
+            }
+
+            this.mod('Col', this.parentBlock().mod('ItemCol'))
+                .append(
+                    this.get('label', 'thumb', 'video', 'rating', 'title', 'text', 'price')
+                )
+
+            if (this.parentBlock().mod('ColorWiz')) {
+                var item = this
+                item.get('thumb')[0].on('ColorWizMagic', function (e, color) {
+                    requestAnimationFrame(function () {
+                        item.css({
+                            color: color.title
+                        })
+                    })
+                })
+            }
+        }
+    },
+
+    Showcase__items: {
+        inherits: 'Grid',
+        mod: {
+            Tiles: true
+        }
+    },
+
+    Showcase__title: {
+        inherits: 'Typo',
+        mod: {
+            Text:'M',
+            Line: 'S',
+        }
+    },
+
+    Showcase__text: {
+        inherits: 'Typo',
+        mod: {
+            Text:'S',
+            Line: 'S',
+            Medium: true
+        }
+    },
+
+    Showcase__price: {
+        inherits: 'Typo',
+        mod: {
+            Text:'M',
+            Line: 'S',
+        },
+        expand: function () {
+            this.implementWith(<Price>{this.get()}</Price>)
+        }
+    },
+
+    /**
+     * @elem Showcase__thumb Тумбнеил
+     * @ext thumb
+     */
+    Showcase__thumb: {
+        expand: function () {
+            var ratio = this.parentBlock().mod('ItemRatio')
+            var col = this.parentBlock().mod('ItemCol')
+            var fit = this.parentBlock().mod('ItemFit')
+            var rounded = this.parentBlock().mod('ItemRounded')
+            var colorwiz = this.parentBlock().mod('ColorWiz')
+            var shadow = this.parentBlock().mod('ItemShadow')
+
+            this.implementWith(
+                <Thumb
+                    Fit="{fit}"
+                    Ratio="{ratio}"
+                    Col="{col}"
+                    Rounded="{rounded}"
+                    ColorWiz="{colorwiz}"
+                    Shadow="{shadow}">{this.get()}</Thumb>
+            )
+        }
+    },
+
+    /**
+     * @elem Showcase__video Тумбнеил с видео
+     * @ext VideoThumb
+     */
+    Showcase__video: {
+        expand: function () {
+            var col = this.parentBlock().mod('ItemCol')
+
+            this.implementWith(
+                <VideoThumb Col="{col}">{this.get()}</VideoThumb>
+            )
+        }
+    },
+
+    /**
+     * @elem Showcase__rating Рейтинг
+     * @ext rating
+     */
+    Showcase__rating: {
+        expand: function () {
+            this.implementWith(
+                <Rating>
+                    <value>{this.text()}</value>
+                </Rating>
+            )
+        }
+    }
+})
+
+/**
+ * @example
+ * <Showcase ItemRatio="2x3" ItemCol="3">
+ *     <item href="#">
+ *         <thumb>/assets/poster/01.jpg</thumb>
+ *         <title>Темный рыцарь</title>
+ *         <rating>3</rating>
+ *         <text>боевик</text>
+ *     </item>
+ *     <item href="#">
+ *         <thumb>/assets/poster/02.jpg</thumb>
+ *         <title>Линкольн</title>
+ *         <rating>4</rating>
+ *         <text>драмма</text>
+ *     </item>
+ *     <item href="#">
+ *         <label>премьера</label>
+ *         <thumb>/assets/poster/03.jpg</thumb>
+ *         <title>Она</title>
+ *         <rating>5</rating>
+ *         <text>фантастика</text>
+ *     </item>
+ *     <item href="#">
+ *         <thumb>/assets/poster/04.jpg</thumb>
+ *         <title>Приключения Тинтина</title>
+ *         <rating>2</rating>
+ *         <text>мультфильм</text>
+ *     </item>
+ * </Showcase>
+ */
+
+/**
+ * @example
+ * <Showcase ItemRatio="4x3" ItemCol="5">
+ *     <item href="#">
+ *         <video HD>
+ *             <thumb>/assets/games/01.jpg</thumb>
+ *             <time>15:21</time>
+ *         </video>
+ *         <title>Первый взгляд на бетту Battlefield 1</title>
+ *     </item>
+ *     <item href="#">
+ *         <video>
+ *             <thumb>/assets/games/02.jpg</thumb>
+ *             <time>24:43</time>
+ *         </video>
+ *         <title>Battlefield 1 прохождение - начало мировых войн #1 (BF1)</title>
+ *     </item>
+ *     <item href="#">
+ *         <video HD>
+ *             <thumb>/assets/games/03.jpg</thumb>
+ *             <time>1:10:30</time>
+ *         </video>
+ *         <title>Топ 5 лучших battlefield</title>
+ *     </item>
+ * </Showcase>
+ */

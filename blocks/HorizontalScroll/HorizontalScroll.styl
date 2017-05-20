@@ -1,0 +1,49 @@
+.HorizontalScroll
+    position relative
+
+    &:after
+    &:before
+        z-index 3
+        position absolute
+        width 1px
+        top -5px
+        bottom -5px
+        background rgba(0,0,0,alpha-border)
+
+    &:after
+        right 0
+
+    &:before
+        left 0
+
+    .grid_width_margin &_showOverflowRight:after
+        content ''
+
+    .grid_width_margin &_showOverflowLeft:before
+        content ''
+
+    &__scrollContainer
+        clear both
+        overflow hidden
+        position relative
+
+    &__scroll
+        touch-scroll x
+        padding-bottom 40px
+        margin-bottom -40px
+
+    &__scrollContent
+        display inline
+
+    &_state_scrolled &__right
+        display none
+
+    &__right
+        border-radius 4px 0 0 4px
+        position absolute
+        top 0
+        bottom 0
+        right 0
+        width 40px
+        background center center no-repeat @css{url(i/right.svg)}
+        background-color rgba(0,0,0,.4)

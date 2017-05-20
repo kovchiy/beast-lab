@@ -1,0 +1,5 @@
+Beast.decl({
+    Fact2: {
+        inherits: 'Fact value path pathItem'
+    }
+})

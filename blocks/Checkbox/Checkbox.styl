@@ -1,0 +1,100 @@
+.Checkbox
+
+    /**
+     * Mixin
+     */
+    define-theme(theme, text, background, check)
+        &_theme_{theme}
+
+            if is-light-color(background)
+                control-border = control-border-light
+                control-focus = control-focus-light
+            else if is-mid-color(background)
+                control-border = control-border-mid
+                control-focus = control-focus-mid
+            else if is-dark-color(background)
+                control-border = control-border-dark
+                control-focus = control-focus-dark
+
+            .checkbox__label
+                color text
+
+            .checkbox__check
+                background background * control-foreground-light
+
+            &.checkbox_state
+                &_active
+                    .checkbox__box
+                        background-color check
+                &_release
+                    .checkbox__box
+                        background-color background * control-border
+
+            &.checkbox_mouseover.checkbox_state
+                &_release
+                    .checkbox__box
+                        background-color background * control-border * control-hover
+                &_active
+                    .checkbox__box
+                        background-color check * control-hover
+
+    define-shape(platform, size)
+        &__box
+            width size
+            height size
+            border-radius radius-inside
+
+        if platform is touch
+            &__check
+                mask center center no-repeat @css{url(i/check-touch.svg)}
+
+        if platform is desktop
+            &__check
+                mask center center no-repeat @css{url(i/check-desktop.svg)}
+
+    /**
+     * Style
+     */
+    for theme in control-theme
+        define-theme(
+            theme,
+            control-theme[theme].text,
+            control-theme[theme].background,
+            control-theme[theme].check
+        )
+
+    @media screen-touch
+        define-shape(touch, control-size-xs-touch)
+
+    @media screen-desktop
+        define-shape(desktop, control-size-xs-desktop)
+
+    &__box
+        display inline-block
+        vertical-align middle
+        position relative
+        transition background .1s linear
+
+    &__check
+        position absolute
+        top 0
+        bottom 0
+        left 0
+        right 0
+        transition opacity .1s, transform .2s
+
+    &__label
+        display inline-block
+        vertical-align middle
+        margin-left 1ex
+
+    &_state
+        &_release
+            .checkbox__check
+                opacity 0
+                transform translateY(-5px)
+
+        &_active
+            .checkbox__check
+                opacity 1
+                transform translateY(0px)

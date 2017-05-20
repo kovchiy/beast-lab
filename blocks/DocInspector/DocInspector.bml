@@ -1,0 +1,205 @@
+/**
+ * @block DocInspector Инспектор документации блоков
+ * Срабатывает по нажатию «cmd + shift + X»
+ * @tag tools
+ *
+ * @event DocInspector:Active       Инспектор включен
+ * @event DocInspector:Release      Испектор выключен
+ * @event DocInspector:FrameActive  Рамка активирована на блоке
+ * @data blockName {string}
+ * @event DocInspector:FrameRelease  Рамка деактивирована
+ */
+
+Beast.decl({
+    DocInspector: {
+        mod: {
+            state: 'release', // @mod State {release! active}
+        },
+        param: {
+            target: undefined,
+            frame: undefined,
+            doc: undefined,
+            docTitle: '',
+        },
+        expand: function () {
+            this.param({
+                    frame: <frame/>
+                })
+                .append(
+                    this.param('frame')
+                )
+        },
+        onMod: {
+            state: {
+                active: function () {
+                    this.param('frame').mod({
+                        visible: true,
+                        state: 'release',
+                    })
+                    this.triggerWin('Active')
+                },
+                release: function () {
+                    this.param('frame').mod({
+                        visible: false
+                    })
+                    this.triggerWin('Release')
+                }
+            },
+        },
+        onWin: {
+            keydown: function (e) {
+                // cmd + shift + x
+                if (e.keyCode === 88 && e.shiftKey && e.metaKey) {
+                    if (this.mod('state') === 'active' && this.param('frame').mod('state') === 'release') {
+                        this.mod('state', 'release')
+                    } else {
+                        this.mod('state', 'active')
+                        this.param('frame').mod('state', 'release')
+                    }
+                }
+                // esc
+                if (e.keyCode === 27) {
+                    this.mod('state', 'release')
+                }
+            },
+            mousemove: function (e) {
+                if (this.mod('state') === 'release' ||
+                    this.param('frame').mod('state') === 'active') {
+                    return
+                }
+
+                this.param('frame').mod('visible', true)
+
+                var domNode = this.domNodeFromPoint(e.clientX, e.clientY)
+                var target = domNode && domNode.bemNode
+
+                if (target === undefined) {
+                    return
+                }
+
+                target = target.isBlock() ? target : target.parentBlock()
+                this.param('target', target)
+
+                if (target.parentNode()) {
+                    this.frameAround(target)
+                } else {
+                    this.param('frame').mod('visible', false)
+                }
+            }
+        },
+        domNodeFromPoint: function (x, y) {
+            var visible = this.param('frame').mod('visible')
+            this.param('frame').mod('visible', false)
+            var domNode = document.elementFromPoint(x, y)
+            this.param('frame').mod('visible', visible)
+            return domNode
+        },
+        frameAround: function (target) {
+            var domNode = target.domNode()
+            var targetWidth
+            var targetHeight
+            var targetLeft
+            var targetTop
+
+            if (domNode.getBoundingClientRect) {
+                var rect = domNode.getBoundingClientRect()
+                var scrollTop = window.pageYOffset || domNode.scrollTop || document.body.scrollTop
+                var scrollLeft = window.pageXOffset || domNode.scrollLeft || document.body.scrollLeft
+                var clientTop = domNode.clientTop || document.body.clientTop || 0
+                var clientLeft = domNode.clientLeft || document.body.clientLeft || 0
+
+                targetWidth = domNode.offsetWidth
+                targetHeight = domNode.offsetHeight
+                targetLeft = rect.left + scrollLeft - clientLeft
+                targetTop = rect.top + scrollTop - clientTop
+            } else {
+                targetWidth = domNode.offsetWidth
+                targetHeight = domNode.offsetHeight
+                targetLeft = domNode.offsetLeft
+                targetTop = domNode.offsetTop
+
+                var parent = domNode
+                while (parent = parent.offsetParent) {
+                    targetLeft += parent.offsetLeft
+                    targetTop += parent.offsetTop
+                }
+            }
+
+            this.param('frame')
+                .css({
+                    left: targetLeft,
+                    top: targetTop,
+                    width: targetWidth,
+                    height: targetHeight,
+                })
+                .setLabel(target.selector())
+        },
+        openDocWindow: function (blockName) {
+            if (this.param('docWindow')) {
+                this.param('docWindow').focus()
+                this.param('docWindow').postMessage({name:'DocInspector', block:blockName}, '*')
+                return
+            }
+
+            var that = this
+            var screenWidth = window.screen.width
+            var screenHeight = window.screen.height
+            var docWidth = 800
+            var docHeight = 600
+            var docLeft = screenWidth - docWidth
+            var docTop = 0
+            var docWindow = window.open(
+                `/doc?block=${blockName}`,
+                'BeastDoc',
+                `width=${docWidth},height=${docHeight},top=${docTop},left=${docLeft},menubar=0,status=0,toolbar=0`
+            )
+
+            // В режиме эмуляции телефона браузер неправильно создает окно
+            if (MissEvent.mobile) {
+                setTimeout(function () {
+                    docWindow.moveTo(600, 0)
+                    docWindow.resizeTo(docWidth, docHeight)
+                }, 50)
+            }
+
+            docWindow.addEventListener('beforeunload', function (e) {
+                that.param('docWindow', '')
+            }, false)
+
+            this.param('docWindow', docWindow)
+        }
+    },
+    DocInspector__frame: {
+        mod: {
+            state: 'release',
+            visible: false,
+        },
+        on: {
+            'mousedown touchdown': function () {
+                this.mod('state', 'active')
+            }
+        },
+        onMod: {
+            state: {
+                active: function () {
+                    this.triggerWin('FrameActive', this.param('label').text())
+                    this.parentBlock().openDocWindow(
+                        this.param('label').text()
+                    )
+                },
+                release: function () {
+                    this.triggerWin('FrameRelease')
+                }
+            }
+        },
+        expand: function () {
+            this.param('label', <frameLabel/>)
+            this.append(
+                this.param('label')
+            )
+        },
+        setLabel: function (text) {
+            this.param('label').empty().append(text)
+        }
+    },
+})

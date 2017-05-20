@@ -1,0 +1,28 @@
+/**
+ * @block Metas Метададнные снипетов
+ * @dep typo
+ * @tag snippet
+ * @ext typo
+ */
+Beast.decl({
+    Metas: {
+        inherits: 'Typo', // @inherits Typo
+        mod: {
+            text: 'M',  // @mod Text {S M! L XL}  Размер текста
+            line: 'M',  // @mod Line {S M! L XL}  Высота строки
+        },
+        expand: function () {
+            this.append(
+                this.get('/')
+            )
+        }
+    }
+})
+
+/**
+ * @example
+ * <Metas>
+ *     <meta>Продуктовый магазин</meta>
+ *     <meta>Гипермаркет</meta>
+ * </Metas>
+ */

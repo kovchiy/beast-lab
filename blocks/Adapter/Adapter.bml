@@ -1,0 +1,15 @@
+/**
+ * @block Adapter Адаптер для данных из репорта
+ */
+Beast.decl({
+    Adapter: {
+        final: 'adapter',
+
+        /**
+         * @method adapter
+         * @arg data {object}
+         */
+        adapter: function (data) {
+        }
+    }
+})

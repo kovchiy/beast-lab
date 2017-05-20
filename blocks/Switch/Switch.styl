@@ -1,0 +1,95 @@
+.Switch
+
+    /**
+     * Mixin
+     */
+    define-theme(theme, text, background, action, check)
+        &_theme_{theme}
+
+            if is-light-color(background)
+                control-border = control-border-light
+                control-focus = control-focus-light
+            else if is-mid-color(background)
+                control-border = control-border-mid
+                control-focus = control-focus-mid
+            else if is-dark-color(background)
+                control-border = control-border-dark
+                control-focus = control-focus-dark
+
+            .switch__label
+                color text
+
+            .switch__pointer
+                background-color background * control-foreground-light
+
+            &.switch_state
+                &_release
+                    .switch__track
+                        background background * control-border
+                &_active
+                    .switch__track
+                        background check
+
+            &.switch_mouseover.switch_state
+                &_release
+                    .switch__track
+                        background background * control-border * control-hover
+                &_active
+                    .switch__track
+                        background check * control-hover
+
+
+    define-shape(size, margin)
+        pointer-size = size - margin * 2
+
+        &__track
+            width pointer-size * 2 + margin * 2;
+            height size
+            border-radius size
+
+        &__pointer
+            width pointer-size
+            height pointer-size
+            top margin
+
+        &_state
+            &_release
+                .switch__pointer
+                    transform translateX(margin)
+            &_active
+                .switch__pointer
+                    transform translateX(margin + pointer-size)
+
+    /**
+     * Style
+     */
+    for theme in control-theme
+        define-theme(
+            theme,
+            control-theme[theme].text,
+            control-theme[theme].background,
+            control-theme[theme].action,
+            control-theme[theme].check
+        )
+
+    @media screen-touch
+        define-shape(control-size-s-touch, control-margin-touch)
+
+    @media screen-desktop
+        define-shape(control-size-s-desktop, control-margin-desktop)
+
+    &__label
+        display inline-block
+        vertical-align middle
+        margin-left 1.5ex
+
+    &__track
+        position relative
+        display inline-block
+        vertical-align middle
+        transition background .1s
+
+    &__pointer
+        position absolute
+        transition left .1s, transform .1s
+        border-radius 100%

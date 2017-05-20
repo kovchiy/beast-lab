@@ -1,0 +1,24 @@
+/**
+ * @block MetroStation Станция метро
+ * @dep typo
+ * @tag snippet oo geo
+ * @ext typo
+ */
+Beast.decl({
+    MetroStation: {
+        inherits: 'Typo', // @inherits Typo
+        mod: {
+            City: 'moscow', // @mod City {string} Название города на английском (пока поддерживается только moscow)
+            Line: '1',      // @mod Line {1 2 3 4 5 6 7 8 8A 9 10 11A 12} Номер линии
+            Text: 'M',
+        },
+        expand: function () {
+            this.append(
+                <line/>,
+                <title>{this.text()}</title>
+            )
+        }
+    }
+})
+
+// @example <MetroStation City="moscow" Line="1">Сокольники</MetroStation>

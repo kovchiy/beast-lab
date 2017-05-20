@@ -1,0 +1,80 @@
+.Radiogroup
+
+    /**
+     * Mixin
+     */
+    define-theme(theme, text, background)
+        &_theme_{theme}
+
+            if is-light-color(background)
+                control-background = control-background-light
+                control-hint = control-hint-light
+                color-release-factor = 45%
+            else if is-mid-color(background)
+                control-background = control-background-mid
+                control-hint = control-hint-mid
+                color-release-factor = 45%
+            else if is-dark-color(background)
+                control-background = control-background-dark
+                control-hint = control-hint-dark
+                color-release-factor = 30%
+
+            background background * control-background
+
+            .radiogroup__pointer
+                background background * control-foreground-light
+
+            .radiogroup__option
+                color text
+                &_state_release
+                    color mix(background, text, color-release-factor)
+                &_mouseover
+                    color text
+
+    define-shape(size, margin)
+        border-radius radius-inside
+
+        &__option
+            height size
+            line-height size
+
+        &__pointer
+            border-radius radius-inside - 2px
+            top margin
+            bottom margin
+
+    /**
+     * Style
+     */
+    for theme in control-theme
+        define-theme(
+            theme,
+            control-theme[theme].text,
+            control-theme[theme].background
+        )
+
+    @media screen-touch
+        define-shape(control-size-m-touch, control-margin-touch)
+
+    @media screen-desktop
+        define-shape(control-size-m-desktop, control-margin-desktop)
+
+    display table @css{!important}
+    position relative
+
+    &__option
+        display table-cell
+        text-align center
+        position relative
+        z-index 1
+        transition color .15s linear
+        &_state_active
+            cursor default
+
+    &__pointer
+        position absolute
+        left 0
+        &_transition
+            transition:
+                width .2s,
+                transform .2s

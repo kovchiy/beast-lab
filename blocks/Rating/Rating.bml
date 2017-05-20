@@ -1,0 +1,39 @@
+/**
+ * @block Rating Рейтинг (звезды)
+ * @dep Typo
+ * @tag snippet oo
+ * @ext typo
+ */
+Beast.decl({
+    Rating: {
+        inherits: 'Typo',
+        mod: {
+            Text: 'S',
+            Line: 'M',
+            Medium: true,
+        },
+        expand: function () {
+            if (this.has('value')) {
+                var value = parseInt(this.get('value')[0].text())
+                for (var i = 1; i <= 5; i++) {
+                    var state = i <= value ? 'active' : 'release'
+                    this.append(
+                        <star State="{state}"/>
+                    )
+                }
+            }
+
+            this.append(
+                this.get('text')
+            )
+        }
+    }
+})
+
+/**
+ * @example
+ * <Rating>
+ *     <text>12 отзывов</text>
+ *     <value>4</value>
+ * </Rating>
+ */

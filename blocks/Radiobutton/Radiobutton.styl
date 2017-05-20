@@ -1,0 +1,103 @@
+.Radiobutton
+
+    /**
+     * Mixin
+     */
+    define-theme(theme, text, background, check)
+        &_theme_{theme}
+
+            if is-light-color(background)
+                control-border = control-border-light
+                control-focus = control-focus-light
+            else if is-mid-color(background)
+                control-border = control-border-mid
+                control-focus = control-focus-mid
+            else if is-dark-color(background)
+                control-border = control-border-dark
+                control-focus = control-focus-dark
+
+            &.Radiobutton_state
+                &_release
+                    .Radiobutton__box
+                        background-color background * control-border
+                &_active
+                    .Radiobutton__box
+                        background-color check
+
+            &.Radiobutton_mouseover.Radiobutton_state
+                &_release
+                    .Radiobutton__box
+                        background-color background * control-border * control-hover
+                &_active
+                    .Radiobutton__box
+                        background-color check * control-hover
+
+            .Radiobutton__check
+                background background * control-foreground-light
+
+            .Radiobutton__label
+                color text
+
+    define-shape(size)
+        box-size = size + 2px
+        check-size = round(size * control-margin-factor)
+
+        &__box
+            width box-size
+            height box-size
+
+        &__check
+            if even(check-size)
+                width check-size
+                height check-size
+                left (box-size / 2) - (check-size / 2)
+                top (box-size / 2) - (check-size / 2)
+            else
+                width check-size + 1
+                height check-size + 1
+                left (box-size / 2) - ((check-size + 1) / 2)
+                top (box-size / 2) - ((check-size + 1) / 2)
+
+    /**
+     * Style
+     */
+    for theme in control-theme
+        define-theme(
+            theme,
+            control-theme[theme].text,
+            control-theme[theme].background,
+            control-theme[theme].check
+        )
+
+    @media screen-touch
+        define-shape(control-size-xs-touch)
+
+    @media screen-desktop
+        define-shape(control-size-xs-desktop)
+
+    &_state
+        &_release
+            .radiobutton__check
+                opacity 0
+                transform scale(.1)
+        &_active
+            .radiobutton__check
+                opacity 1
+                transform scale(1)
+
+    &__box
+        display inline-block
+        vertical-align middle
+        border-radius 100%
+        position relative
+        transition background .1s linear
+
+    &__check
+        position absolute
+        border-radius 100%
+        transition opacity .1s, transform .2s
+
+    &__label
+        display inline-block
+        vertical-align middle
+        margin-left 1ex

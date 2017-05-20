@@ -1,0 +1,69 @@
+/**
+ * @block ControlForm Предок всех контролов
+ * @dep Control Typo Grid Locale Tooltip
+ * @tag control
+ * @ext control grid typo locale
+ */
+Beast.decl({
+    ControlForm: {
+        inherits: ['Control', 'Typo', 'Grid', 'Locale'],
+        mod: {
+            Text: 'M',
+            Theme: 'default', // @mod Theme {string} Цветовая тема
+        },
+        param: {
+            name: '',    // @param name {string} Имя для веб-форм
+            value: '',   // @param value {string} Значение
+            title: '',   // @param title {string} Системная подсказка
+            tooltip: '', // @param tooltip {string} Всплывающая подсказка
+        },
+        on: {
+            Focus: function () {
+                if (this.param('tooltipInstace')) {
+                    this.param('tooltipInstace').remove()
+                    this.param('tooltipInstace', '')
+                }
+            }
+        },
+        expand: function () {
+            if (this.mod('Size') === 'S') {
+                this.mod('Text', 'S')
+            }
+
+            if (this.param('value')) {
+                this.domAttr('value', this.param('value'))
+            }
+
+            if (this.param('name')) {
+                this.domAttr('name', this.param('name'))
+            }
+
+            if (this.param('title')) {
+                this.domAttr('title', this.param('title'))
+            }
+
+            if (this.param('tooltip')) {
+                this.showTooltip(this.param('tooltip'))
+            }
+        },
+        value: function (value) {
+            if (typeof value === 'undefined') {
+                return this.domNode().value
+            } else {
+                this.domNode().value = value
+            }
+        },
+        focus: function () {
+            this.domNode().focus()
+        },
+        showTooltip: function (text) {
+            this.param(
+                'tooltipInstace',
+                <Tooltip Theme="{this.mod('Theme')}">{text}</Tooltip>.bindTo(this)
+            )
+        },
+        setTheme: function (backgroundColor, textColor) {
+
+        }
+    }
+})

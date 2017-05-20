@@ -1,0 +1,50 @@
+/**
+ * @block App Корневой компонент всех страниц
+ * @dep UINavigation DocInspector DocConsole
+ * @tag base
+ * @ext UIStackNavigation
+ */
+Beast.decl({
+    App: {
+        inherits: ['Grid', 'UIStackNavigation layer fog'],
+        tag:'body',
+        mod: {
+            platform: '',
+            device: '',
+            ColCheck:true,
+        },
+        expand: function fn () {
+            this.inherited(fn)
+
+            this.append(
+                <DocInspector/>
+            )
+
+            if (MissEvent.mobile) {
+                this.mix('mobile')
+            }
+
+            if (MissEvent.android) {
+                this.mix('android')
+            }
+
+            if (MissEvent.ios) {
+                this.mix('ios')
+            }
+
+            if (MissEvent.qs('prod') !== undefined) {
+                this.mix('prod')
+            }
+
+            if (MissEvent.qs('exp')) {
+                MissEvent.qs('exp').split(',').forEach(function (expName) {
+                    this.mix('exp_' + expName)
+                }.bind(this))
+            }
+        },
+        domInit: function fn () {
+            this.inherited(fn)
+            history.pushState({}, '', '')
+        }
+    },
+})

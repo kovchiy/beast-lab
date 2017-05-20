@@ -1,0 +1,74 @@
+.Tooltip
+
+    /**
+     * Mixin
+     */
+    define-theme(theme, text, background)
+        &_theme_{theme}
+            background background
+            .tooltip__tail
+                background background
+            .tooltip__label
+                color text
+
+    define-shape(size)
+        &__tail
+            height (size / 2)
+            width (size / 2)
+            left round(size * control-margin-factor)
+
+        &__label
+            position relative
+            z-index 1
+            height size
+            line-height size @css{!important}
+            padding 0 round(size * control-margin-factor)
+
+    /**
+     * Style
+     */
+    for theme in control-theme
+        define-theme(
+            theme,
+            control-theme[theme].background,
+            control-theme[theme].text
+        )
+
+    @media screen-touch
+        define-shape(control-size-s-touch)
+
+    @media screen-desktop
+        define-shape(control-size-s-desktop)
+
+    position absolute
+    cursor pointer
+    box-shadow 0 1ex 2ex -.5ex rgba(0,0,0,.5)
+    transition:
+        transform .5s,
+        opacity .5s
+
+    &_state
+        &_release
+            opacity 0
+            transform translateY(10px)
+        &_active
+            opacity 1
+            transform translateY(0px)
+
+    &__tail
+        position absolute
+        transform rotate(45deg)
+        top 0
+
+        animation-name tooltip-tail
+        animation-duration 1s
+        animation-iteration-count infinite
+        animation-timing-function ease-in-out
+
+        @keyframes tooltip-tail
+            from
+                transform translateY(-3px) rotate(45deg)
+            50%
+                transform translateY(-5px) rotate(45deg)
+            to
+                transform translateY(-3px) rotate(45deg)

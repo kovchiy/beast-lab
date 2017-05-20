@@ -1,0 +1,107 @@
+/**
+ * @block Table Таблица
+ * @dep link typo grid
+ * @tag table fact
+ */
+Beast.decl({
+    Table: {
+        mod: {
+            ScrollX: false,
+            Valign: 'baseline',
+        },
+        expand: function () {
+            this.append(
+                <HorizontalScroll Nomargin>
+                    <body>{this.get()}</body>
+                </HorizontalScroll>,
+                this.get('more')
+            )
+        }
+    },
+    Table__body: {
+        tag: 'table',
+        expand: function () {
+
+            // Adding heads wrapper
+            if (this.has('head')) {
+                this.append(
+                    <heads>{this.get('head')}</heads>,
+                    this.get('row')
+                )
+            } else {
+                this.append(
+                    this.get('heads', 'row')
+                )
+            }
+
+            // Head colspan
+            if (this.elem('head').length === 1) {
+                var colspan = 1
+
+                this.elem('row').forEach(function (row) {
+                    var cellNum = row.get('cell').length
+                    if (cellNum > colspan) colspan = cellNum
+                })
+
+                if (colspan > 1) {
+                    this.elem('head')[0]
+                        .domAttr({colspan:colspan})
+                        .mod('Single', true)
+                }
+            }
+        }
+    },
+    Table__heads: {
+        tag: 'tr',
+    },
+    Table__head: {
+        inherits: 'Table__cell',
+    },
+    Table__row: {
+        tag: 'tr',
+        expand: function () {
+            if (this.param('href')) {
+                this.get('cell').forEach(function (cell) {
+                    cell.param('href', this.param('href'))
+                }.bind(this))
+            }
+        }
+    },
+    Table__cell: {
+        inherits: ['Link', 'Typo', 'Grid'],
+        mod: {
+            Text: 'M',
+            Line: 'S',
+            Strong: false,
+            Right: false,
+            Center: false,
+        },
+        tag: 'td',
+        param: {
+            colspan: '',
+            rowspan: '',
+        },
+        expand: function () {
+            if (this.get('/').length === 0 && this.text().length > 50) {
+                this.append(
+                    Typo.wordWrap(this.text())
+                )
+            }
+
+            this.domAttr({
+                colspan: this.param('colspan'),
+                rowspan: this.param('rowspan'),
+            })
+        }
+    },
+    Table__more: {
+        inherits: ['Link'],
+        param: {
+            type: 'link'    // button
+        },
+        expand: function() {
+            console.log('sss')
+            this.append(this.get())
+        }
+    }
+})

@@ -1,0 +1,26 @@
+.Rating
+    display inline-block
+    white-space nowrap
+
+    &__star
+        display inline-block
+        width 16px
+        height 16px
+        mask center center no-repeat @css{url(i/star.svg)}
+        background color-action
+
+        &_state
+            &_release
+                background #000
+                opacity .2
+        & + &
+            margin-left 1px
+
+    &__text
+        display inline-block
+        opacity alpha-text
+        line-height 16px @css{!important}
+        vertical-align top
+        margin-left 1ex
+        position relative
+        top 1px

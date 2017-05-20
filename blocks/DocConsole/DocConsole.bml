@@ -1,0 +1,779 @@
+/**
+ * @block DocConsole Консоль с документацией к блокам
+ * @dep Locale Control
+ * @tag tools
+ * @ext locale
+ */
+Beast.decl({
+    DocConsole: {
+        inherits: 'Locale',
+        mod: {
+            showExtended: false, // @mod showExtended {boolean} Показывать ли наследуемые поля
+        },
+        param: {
+            doc: undefined,
+            docName: undefined,
+            tagName: undefined,
+            docType: undefined,
+            focusedQuote: undefined,
+        },
+        onMod: {
+            showExtended: {
+                true: function () {
+                    if (this.param('focusedQuote')) {
+                        this.elem('doc')[0].domNode().scrollTop = this.param('focusedQuote').domNode().offsetTop
+                    }
+                },
+                false: function () {
+                    this.elem('doc')[0].domNode().scrollTop = 0
+                }
+            }
+        },
+        onWin: {
+            'DocInspector:Release': function () {
+                this.mod('state', 'release')
+            },
+            'DocInspector:FrameRelease': function () {
+                this.mod('state', 'release')
+            },
+            'DocInspector:FrameActive': function (e, title) {
+                this.mod('state', 'active')
+                this.showDoc('blocks', title)
+            },
+            message: function (e) {
+                if (e.data.name === 'DocInspector') {
+                    this.showDoc('blocks', e.data.block)
+                }
+            },
+            popstate: function (e) {
+                e.state && this.showDoc(
+                    e.state.block ? 'blocks' : 'libs', e.state.block || e.state.lib, e.state.tag
+                )
+            }
+        },
+        locale: {
+            ru: {
+                mod: 'Модификаторы',
+                param: 'Параметры',
+                event: 'События',
+                method: 'Методы',
+                example: 'Примеры',
+            }
+        },
+        expand: function () {
+            this.append(<doc/>, <nav/>)
+        },
+        domInit: function () {
+            this.loadDoc()
+            this.showDoc(
+                MissEvent.qs('block') ? 'blocks' : 'libs',
+                (MissEvent.qs('block') || MissEvent.qs('lib') || '').toLowerCase(),
+                (MissEvent.qs('tag') || '').toLowerCase()
+            )
+        },
+        loadDoc: function () {
+            if (this.param('doc') === undefined) {
+                Ajax({
+                    url: '/build/doc.js',
+                    jsonp: 'BeastDoc',
+                    success: function (data) {
+                        this.param('doc', data)
+                        this.onDocLoad()
+                    }.bind(this)
+                })
+            }
+        },
+        onDocLoad: function () {
+            if (this.mod('loading')) {
+                this.mod('loading', false)
+                this.showDoc()
+            }
+            this.showNav()
+        },
+        showDoc: function (docType, docName, tagName) {
+            if (docType !== undefined) {
+                this.param({
+                    docType: docType,
+                    docName: docName,
+                    tagName: tagName
+                })
+            }
+
+            var doc = this.elem('doc')[0]
+            var that = this
+
+            function forEach (obj, callback) {
+                callback = callback.bind(this)
+
+                if (Array.isArray(obj)) {
+                    obj.forEach(callback)
+                }  else if (typeof obj === 'object') {
+                    for (var key in obj) {
+                        callback(obj[key], key, obj)
+                    }
+                }
+            }
+
+            function table (type, prop) {
+                var table = <table title="{that.string(type)}" type="{type}"/>
+
+                var sortedPropKeys = []
+                var sortedProp = {}
+                for (var key in prop) {
+                    sortedPropKeys.push(key)
+                }
+                sortedPropKeys.sort()
+
+                for (var i = 0, ii = sortedPropKeys.length; i < ii; i++) {
+                    sortedProp[sortedPropKeys[i]] = prop[sortedPropKeys[i]]
+                }
+
+                forEach(sortedProp, function (item, key) {
+                    var row = <row/>.appendTo(table)
+
+                    <cell>{item.name}</cell>.appendTo(row)
+
+                    if (typeof item.value === 'string') {
+                        <cell Em>{item.value}</cell>.appendTo(row)
+                    } else if (item.value !== undefined) {
+                        var values = []
+                        forEach(item.value, function (value, key) {
+                            values.push(
+                                value
+                                    ? <quote Default>{key}</quote>
+                                    : key,
+                                ', '
+                            )
+                        })
+                        values.pop()
+                        <cell Em>{values}</cell>.appendTo(row)
+                    }
+
+                    if (item.arg) {
+                        var args = ''
+                        forEach(item.arg, function (arg) {
+                            args += '\n' + arg.name + ' :' + arg.value
+                        })
+                        <cell Pre Em>{args.substr(1)}</cell>.appendTo(row)
+                    }
+
+                    if (item.text) {
+                        row.append(
+                            <cell Hint>
+                                {item.text}
+                                {item.source && [' · ', <link href="?{that.param('docType')}={item.source.toLowerCase()}">{item.source}</link>]}
+                            </cell>
+                        )
+                    }
+
+                    if (item.source) {
+                        row.mod('extended', true)
+                    }
+                })
+
+                return table
+            }
+
+            if (this.param('doc') === undefined) {
+                this.mod('loading', true)
+                doc.expand(
+                    <title>{this.param('docName')}</title>,
+                    <text>Документация загружается...</text>
+                )
+            }
+            else {
+                var block = this.param('doc')[this.param('docType')][this.param('docName')]
+
+                if (block === undefined) {
+                    if (this.param('docName')) {
+                        doc.expand(
+                            <title>{this.param('docName')}</title>,
+                            <text Warn>Компонент не описан</text>
+                        )
+                    } else {
+                        doc.expand()
+                    }
+                } else {
+                    // console.log(block)
+
+                    doc.expand(
+                        block.lastCommitDate && <date href="{block.lastCommitHref}">{block.lastCommitDate}</date>,
+                        <title>
+                            {block.name}
+                            {
+                                block.ext && [': '].concat(
+                                    block.ext.map(function (ext) {
+                                        return that.param('doc')[that.param('docType')][ext] && (
+                                            <link href="?{that.param('docType')}={ext.toLowerCase()}">{
+                                                that.param('doc')[that.param('docType')][ext].name
+                                            }</link>
+                                        )
+                                    })
+                                )
+                            }
+                        </title>,
+
+                        block.text && <text>{block.text}</text>,
+                        block.mod && table('mod', block.mod),
+                        block.param && table('param', block.param),
+                        block.method && table('method', block.method),
+                        block.event && table('event', block.event),
+
+                        block.elem && <divider/>,
+                        block.elem && Object.keys(block.elem).map(function (elemName) {
+                            var elem = block.elem[elemName]
+                            var ext = elem.ext && [' : '].concat(
+                                elem.ext.map(function (ext) {
+                                    return that.param('doc')[that.param('docType')][ext] && (
+                                        <link href="?block={ext.toLowerCase()}">{
+                                            that.param('doc')[that.param('docType')][ext].name
+                                        }</link>
+                                    )
+                                })
+                            )
+                            return [
+                                <text>
+                                    <quote Elem>{block.name}__{elem.name}</quote>{ext} — {elem.text}
+                                </text>,
+                                elem.mod && table('mod', elem.mod),
+                                elem.param && table('param', elem.param),
+                                elem.method && table('method', elem.method),
+                                elem.event && table('event', elem.event),
+                            ]
+                        }),
+
+                        block.example && block.example.map(function (example) {
+                            return <example title="{example.extra}">{example.text}</example>
+                        })
+                    )
+                }
+            }
+        },
+        showNav: function () {
+            var nav = this.elem('nav')[0]
+            if (nav === undefined) return
+
+            var blocks = []
+            var libs = []
+            var groups = []
+            var tags = this.param('doc').tags.sort(function (a, b) {
+                return a > b ? 1 : -1
+            })
+
+            // Объект блоков превратить в массив
+            for (var name in this.param('doc').blocks) {
+                blocks.push(this.param('doc').blocks[name])
+            }
+
+            // Массив блоков упорядочить по имени
+            blocks = blocks.sort(function (a, b) {
+                return a.name > b.name ? 1 : -1
+            })
+
+            // Объект библиотек превратить в массив
+            for (var name in this.param('doc').libs) {
+                libs.push(this.param('doc').libs[name])
+            }
+
+            // Массив библиотек упорядочить по имени
+            libs = libs.sort(function (a, b) {
+                return a.name > b.name ? 1 : -1
+            })
+
+            nav.expand(
+                <navGroup title="Block">{
+                    blocks.map(function (block) {
+                        return <navItem block="{block.name.toLowerCase()}">{block.name}</navItem>
+                    })
+                }</navGroup>,
+                <navGroup title="Lib">{
+                    libs.map(function (lib) {
+                        return <navItem lib="{lib.name.toLowerCase()}">{lib.name}</navItem>
+                    })
+                }</navGroup>,
+                <navDivider/>,
+                tags.map(function (tag) {
+                    tag = tag.toLowerCase()
+                    return (
+                        <navGroup title="{tag}">{
+                            blocks.map(function (block) {
+                                if (block.tag !== undefined && block.tag.indexOf(tag) !== -1) {
+                                    return <navItem block="{block.name.toLowerCase()}">{block.name}</navItem>
+                                }
+                            })
+                        }</navGroup>
+                    )
+                })
+            )
+
+            // Выделить пункт 'docName' в группе 'tag'
+            if (this.param('docName') && this.param('tagName')) {
+                this.elem('navGroupTitle').forEach(function (elem) {
+                    if (elem.param('tag') === this.param('tagName')) {
+                        elem.mod('state', 'active')
+                    }
+                }.bind(this))
+
+                this.elem('navItem').forEach(function (elem) {
+                    if (elem.param('tag') === this.param('tagName') && (
+                        elem.param('block') === this.param('docName') || elem.param('lib') === this.param('docName')
+                    )) {
+                        elem.mod('state', 'active', true)
+                    }
+                }.bind(this))
+
+                this.param({block:'', tag:'',})
+            }
+        }
+    },
+
+    DocConsole__doc: {
+        expand: function () {
+            if (this.has('date')) {
+                var date = this.get('date')[0]
+                var d = new Date(parseInt(date.text()))
+                var months = ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'авг', 'сен', 'окт', 'ноя', 'дек']
+                var ddmmyy = d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear()
+                var href = date.param('href')
+            }
+
+            this.append(
+                <actions>
+                    {date && <action Name="date" href="{href}" title="Дата последней правки блока">{ddmmyy}</action>}
+                    <action Name="showall" title="Быстрая клавиша: A">Показать всё</action>
+                </actions>,
+                this.get(
+                    'title', 'subtitle', ['text', 'table', 'divider', 'example']
+                )
+            )
+        },
+    },
+
+    DocConsole__action: {
+        tag: 'a',
+        mod: {
+            name: '',
+            state: '',
+        },
+        param: {
+            href: '',
+            title: '',
+        },
+        onMod: {
+            state: {
+                release: function () {
+                    if (this.mod('name') === 'showall') {
+                        this.parentBlock().mod('showExtended', false)
+                    }
+                },
+                active: function () {
+                    if (this.mod('name') === 'showall') {
+                        this.parentBlock().mod('showExtended', true)
+                    }
+                }
+            }
+        },
+        expand: function () {
+            this.domAttr({
+                title: this.param('title'),
+                href: this.param('href'),
+            })
+
+            if (this.mod('name') === 'showall') {
+                this.mod('state', 'release')
+                    .on('click', function () {
+                        this.toggleMod('state', 'release', 'active')
+                    })
+                    .onWin('keypress', function (e) {
+                        if (e.code === 'KeyA') {
+                            this.toggleMod('state', 'release', 'active')
+                        }
+                    })
+            }
+        },
+    },
+
+    DocConsole__link: {
+        tag:'a',
+        param: {
+            href: '',
+        },
+        expand: function () {
+            this.domAttr('href', this.param('href'))
+        },
+    },
+    DocConsole__text: {
+        domInit: function () {
+            if (!this.mod('Code')) {
+                Typo.hashtagReplace(this.domNode(), '<a href="?block=$1">$1</a>')
+            }
+        }
+    },
+    DocConsole__quote: {
+        on: {
+            mouseover: function () {
+                this.parentBlock().param('focusedQuote', this)
+            },
+            mouseoout: function () {
+                this.parentBlock().param('focusedQuote', '')
+            }
+        }
+    },
+    DocConsole__example: {
+        expand: function () {
+            this.append(
+                this.param('title') && <exampleTitle>{this.param('title')}</exampleTitle>,
+                <code>{this.text()}</code>,
+                <exampleTabs>
+                    <exampleTab title="Маленький телефон">320</exampleTab>
+                    <exampleTab title="Средний телефон">360</exampleTab>
+                    <exampleTab title="Большой телефон">414</exampleTab>
+                    <exampleTab title="Планшет портрет">768</exampleTab>
+                    <exampleTab title="Планшет альбом">1024</exampleTab>
+                    <exampleTab title="Десктоп">1280</exampleTab>
+                </exampleTabs>,
+                <exampleCanvas>{this.text()}</exampleCanvas>
+            )
+        }
+    },
+    DocConsole__code: {
+        mod: {
+            state: '',
+        },
+        param: {
+            maxHeight: 16 * 10
+        },
+        domInit: function () {
+            if (this.domNode().offsetHeight > this.param('maxHeight') * 1.1) {
+                this.mod('state', 'shorten')
+            }
+        },
+        onMod: {
+            state: {
+                shorten: function () {
+                    this.param('originalHeight', this.domNode().offsetHeight)
+
+                    if (!this.css('height')) {
+                        this.css('height', this.param('originalHeight'))
+
+                    }
+
+                    requestAnimationFrame(function () {
+                        this.css('height', this.param('maxHeight'))
+                    }.bind(this))
+                },
+                full: function () {
+                    this.css('height', this.param('originalHeight'))
+                }
+            }
+        },
+        on: {
+            mousedown: function () {
+                this.param('mousedown', true)
+            },
+            mouseup: function () {
+                if (this.param('mousedown')) {
+                    this.mod('state') && this.toggleMod('state', 'full', 'shorten')
+                } else {
+                    if (document.selection) {
+                        var range = document.body.createTextRange()
+                        range.moveToElementText(this.domNode())
+                        range.select()
+                    } else if (window.getSelection) {
+                        var range = document.createRange()
+                        range.selectNode(this.domNode())
+                        window.getSelection().addRange(range)
+                    }
+                }
+
+                this.param('mousedown', false)
+            },
+            mousemove: function () {
+                this.param('mousedown', false)
+            },
+            transitionend: function () {
+                if (this.mod('state') === 'full') {
+                    this.css('height', '')
+                }
+            }
+        }
+    },
+    DocConsole__exampleCanvas: {
+        tag: 'iframe',
+        domAttr: {
+            frameborder: 0,
+        },
+        param: {
+            frameHasListener: false
+        },
+        expand: function () {
+            this.param({
+                    src: '/doc/example?bml=' + encodeURIComponent(this.text())
+                })
+                .empty()
+        },
+        domInit: function () {
+            requestAnimationFrame(function () {
+                this.domAttr('src', this.param('src'))
+            }.bind(this))
+        },
+        on: {
+            load: function () {
+                this.updateHeight()
+                setTimeout(function () {
+                    this.updateHeight()
+                }.bind(this), 200)
+            }
+        },
+        updateHeight: function () {
+            if (this.domNode() && this.domNode().contentWindow) {
+                var that = this
+                var frameDocument = this.domNode().contentWindow.document
+                var frameBody = frameDocument.body
+
+                this.css('height', frameBody.scrollHeight)
+
+                if (!this.param('frameHasListener')) {
+                    this.param('frameHasListener', true)
+                    frameBody.addEventListener('mousedown', function () {
+                        setTimeout(function () {
+                            requestAnimationFrame(function () {
+                                that.updateHeight()
+                            })
+                        }, 100)
+                    })
+                }
+
+                var example = frameDocument.querySelector('.docexample')
+                if (example && !example.bemNode.mod('border')) {
+                    var style = window.getComputedStyle(example)
+                    this.css('margin', style.padding.replace(/(^|\s)/g, "$1-"))
+                }
+            }
+        },
+        updateWidth: function (value) {
+            this.css('width', value)
+                .updateHeight()
+        }
+    },
+    DocConsole__exampleTabs: {
+        expand: function () {
+            this.append(
+                this.get('/')
+            )
+        },
+    },
+    DocConsole__exampleTab: {
+        inherits: 'control',
+        mod: {
+            state: 'release'
+        },
+        expand: function () {
+            this.domAttr('title', this.param('title'))
+
+            if (this.index() === 0) {
+                this.mod('state', 'active')
+            }
+        },
+        on: {
+            Release: function () {
+                this.mod('state', 'active')
+            }
+        },
+        onMod: {
+            state: {
+                active: function () {
+                    this.parentNode().get('exampleTab').forEach(function (tab) {
+                        if (tab !== this) {
+                            tab.mod('state', 'release')
+                        }
+                    }.bind(this))
+
+                    this.parentNode().parentNode().get('exampleCanvas')[0].updateWidth(this.text())
+                }
+            }
+        }
+    },
+    DocConsole__table: {
+        tag: 'table',
+        expand: function () {
+            this.append(
+                this.param('title') && <row Header><tableTitle>{this.param('title')}:</tableTitle></row>,
+                this.get('/')
+            )
+        },
+        domInit: function () {
+            Typo.hashtagReplace(this.domNode(), '<a href="?block=$1">$1</a>')
+
+            var extendedOnly = true
+            this.get('row').forEach(function (row) {
+                if (!row.mod('extended') && !row.mod('header')) {
+                    extendedOnly = false
+                }
+            })
+
+            this.mod('extendedOnly', extendedOnly)
+        }
+    },
+    DocConsole__tableTitle: {
+        tag: 'td',
+        domAttr: {
+            colspan: '99'
+        },
+    },
+    DocConsole__row: {
+        tag: 'tr'
+    },
+    DocConsole__cell: {
+        tag: 'td'
+    },
+
+    DocConsole__navGroup: {
+        expand: function () {
+            this.param('title', this.param('title').toLowerCase())
+
+            var navItems = this.get('navItem')
+            navItems.forEach(function (item) {
+                item.param('tag', this.param('title'))
+            }.bind(this))
+
+            this.append(
+                <navGroupTitle tag="{this.param('title')}">{this.param('title')}</navGroupTitle>,
+                navItems
+            )
+        }
+    },
+    DocConsole__navGroupTitle: {
+        inherits:'Control',
+        mod: {
+            state: 'release', // @mod State {release! active} Состояние скрыто/раскрыто
+        },
+        on: {
+            Release: function () {
+                this.toggleMod('state', 'release', 'active')
+            }
+        },
+        onMod: {
+            state: {
+                release: function () {
+                    var height = this.domNode().offsetHeight
+                    requestAnimationFrame(function () {
+                        this.parentNode().css('height', height)
+                    }.bind(this))
+                },
+                active: function () {
+                    height = this.parentNode().get('/').length * this.domNode().offsetHeight
+                    requestAnimationFrame(function () {
+                        this.parentNode().css('height', height)
+                    }.bind(this))
+                }
+            }
+        },
+    },
+    DocConsole__navItem: {
+        inherits:'Control',
+        mod: {
+            state: 'relaese', // @mod State {release! active} Состояние выбран/не выбран
+        },
+        param: {
+            tag: '',
+            block: '', // @param block {string} Блок, для которого нужно показать документацию
+            lib: '', // @param lib {string} Библиотека, для которой нужно показать документацию
+        },
+        on: {
+            Release: function () {
+                this.mod('state', 'active')
+            }
+        },
+        onMod: {
+            state: {
+                active: function (silent) {
+                    if (silent) return
+
+                    var that = this
+                    this.elem('navItem').forEach(function (item) {
+                        if (item !== that) {
+                            item.mod('state', 'release')
+                        }
+                    })
+
+                    MissEvent.qs({
+                        tag: this.param('tag'),
+                        block: this.param('block'),
+                        lib: this.param('lib'),
+                    })
+
+                    if (this.param('block')) {
+                        this.parentBlock().showDoc('blocks', this.param('block'))
+                    }
+
+                    if (this.param('lib')) {
+                        this.parentBlock().showDoc('libs', this.param('lib'))
+                    }
+                }
+            }
+        }
+    },
+})
+
+/* @example
+<DocConsole>
+    <doc>
+        <title>Button</title>
+        <text>Основной контрол</text>
+        <date>1489590083000</date>
+        <table title="Модификаторы">
+            <row>
+                <cell>Size</cell>
+                <cell Em>S M* L</cell>
+                <cell Hint>Размер кнопки</cell>
+            </row>
+            <row>
+                <cell>Focus</cell>
+                <cell Em>boolean</cell>
+                <cell Hint>Сотояние фокуса</cell>
+            </row>
+        </table>
+        <table title="Параметры">
+            <row>
+                <cell>icon</cell>
+                <cell Em>string</cell>
+                <cell Hint>название иконки</cell>
+            </row>
+            <row>
+                <cell>href</cell>
+                <cell Em>string</cell>
+                <cell Hint>Ссылка</cell>
+            </row>
+        </table>
+        <example>\u003CButton>Кнопка\u003C/Button></example>
+        <example>\u003CButton Size="S">Кнопка\u003C/Button></example>
+    </doc>
+    <nav>
+        <navGroup title="Все блоки">
+            <navItem rel="button">Button</navItem>
+            <navItem rel="thumb">Thumb</navItem>
+            <navItem rel="input">Input</navItem>
+            <navItem rel="textarea">Textarea</navItem>
+        </navGroup>
+        <navGroup title="OO">
+            <navItem>Thumb</navItem>
+            <navItem>Input</navItem>
+            <navItem>Textarea</navItem>
+            <navItem>Button</navItem>
+        </navGroup>
+        <navGroup title="БНО">
+            <navItem>Thumb</navItem>
+            <navItem>Input</navItem>
+            <navItem>Textarea</navItem>
+            <navItem>Button</navItem>
+        </navGroup>
+        <navGroup title="Гео">
+            <navItem>Thumb</navItem>
+            <navItem>Input</navItem>
+            <navItem>Textarea</navItem>
+            <navItem>Button</navItem>
+        </navGroup>
+    </nav>
+</DocConsole>
+*/

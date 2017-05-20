@@ -1,0 +1,27 @@
+.Sitelinks
+    &__sitelink
+        color color-link
+        height control-size-m-touch
+        line-height control-size-m-touch @css{!important }
+        position relative
+        background transparent
+        transition background 200ms ease-out
+
+        &_moment_press
+            background rgba(0,0,0,.05)
+
+    &__label
+        position relative
+        ellipsis nowrap
+        padding-right 20px
+
+        &:after
+            content ''
+            position absolute
+            top 0
+            bottom 0
+            right 0
+            height control-size-m-touch
+            width control-size-m-touch
+            background color-link
+            mask right center no-repeat @css{url(i/arrow.svg)}

@@ -1,0 +1,130 @@
+.Textarea
+
+    define-theme(theme, text, background, action)
+        &_theme_{theme}
+
+            if is-light-color(background)
+                control-background = control-background-light
+                control-focus = control-focus-light
+                control-hint = control-hint-light
+                control-disable = control-disable-light
+            else if is-mid-color(background)
+                control-background = control-background-mid
+                control-focus = control-focus-mid
+                control-hint = control-hint-mid
+                control-disable = control-disable-mid
+            else if is-dark-color(background)
+                control-background = control-background-dark
+                control-focus = control-focus-dark
+                control-hint = control-hint-dark
+                control-disable = control-disable-dark
+
+            if is-light-color(background)
+                box-shadow inset 0 0 0 2px background * control-border-light
+                &:before
+                    background-color background * control-foreground-light
+                &.textarea_mouseover
+                    box-shadow inset 0 0 0 2px background * control-border-light * control-hover
+            else
+                background-color background * control-background
+                &.textarea_mouseover
+                    background-color background * control-background * control-hover
+
+            &.textarea_focus
+                control-focus(background * control-focus)
+
+            .textarea__textarea
+                color text
+                &::placeholder
+                    color background * control-hint
+
+            .textarea__clear
+                background background * control-hint
+                &_mouseover
+                    background text
+
+            &.textarea_disabled
+                background-color background * control-disable
+                .textarea__textarea
+                    color mix(background, text, 50%)
+                    &::placeholder
+                        color mix(background, text, 75%)
+
+
+    define-shape(platform, size)
+        border-radius radius-inside
+
+        &:before
+            border-radius radius-inside - 1px
+
+        &__textarea
+            padding round(size * control-margin-factor)
+            padding-right size
+
+        &__clear
+            width size
+            height size
+
+            if platform is touch
+                mask center center no-repeat @css{url(i/clear-touch.svg)}
+            if platform is desktop
+                mask center center no-repeat @css{url(i/clear-desktop.svg)}
+
+    /**
+     * Style
+     */
+    for theme in control-theme
+        define-theme(
+            theme,
+            control-theme[theme].text,
+            control-theme[theme].background,
+            control-theme[theme].action
+        )
+
+    @media screen-touch
+        define-shape(touch, control-size-m-touch)
+
+    @media screen-desktop
+        define-shape(desktop, control-size-m-desktop)
+
+    position relative
+    transition background .15s linear
+
+    &:before
+        content ''
+        display block
+        position absolute
+        top 2px
+        bottom 2px
+        left 2px
+        right 2px
+
+    &__textarea
+        control-style none
+        display block
+        box-sizing border-box
+        position relative
+        z-index 1
+        width 100%
+        resize none
+
+    &__clear
+        position absolute
+        z-index 2
+        top 0
+        right 0
+        transition background .15s linear
+
+    &_empty &__clear
+        display none
+
+    &_disabled
+        box-shadow none
+
+        &
+        .textarea__textarea
+            cursor default @css{!important}
+
+        &:before
+        .textarea__clear
+            display none

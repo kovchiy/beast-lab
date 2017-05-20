@@ -1,0 +1,27 @@
+.ReadMore
+    transition height .2s
+
+    &_state
+        &_short
+            .ReadMore__hiddenText
+                display none
+        &_full
+            .ReadMore__ellipsis
+            .ReadMore__more
+                display none
+
+    &__hiddenText
+        transition opacity .5s
+        opacity 0
+
+    &__textcontent
+    &__hiddenText
+    &__ellipsis
+        display inline
+
+    &__more
+        display inline-block
+        color color-link
+        &:after
+            content ' ›'
+            font-weight bold
