@@ -66,7 +66,7 @@
 
 Желательно иметь свежую версию node.js. Теперь набираем в своей директории с репозиториями:
 ```shell
-git clone git@github.yandex-team.ru:kovchiy/serplab.git # Клонирование репозитория
+git clone https://github.com/kovchiy/beast-lab.git # Клонирование репозитория
 cd serplab # Переход в директорию репозитория
 git fetch --all # Скачать все ветки
 git checkout -b СВОЙ_ЛОГИН # Создание своей ветки и переход в нее
